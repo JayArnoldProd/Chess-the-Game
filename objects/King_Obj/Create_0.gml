@@ -1,0 +1,18 @@
+// King_Obj Create
+image_index = 0;
+image_speed = 0;
+//Movement
+can_move_through_pieces = false;
+has_moved = false;
+
+// All possible one-square moves around the king
+valid_moves = [
+    [0,-1],  // up
+    [1,-1],  // up-right
+    [1,0],   // right
+    [1,1],   // down-right
+    [0,1],   // down
+    [-1,1],  // down-left
+    [-1,0],  // left
+    [-1,-1]  // up-left
+];
