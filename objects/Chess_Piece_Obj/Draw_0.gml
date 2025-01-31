@@ -1,14 +1,14 @@
 // Chess_Piece_Obj Draw
 tile_size = Board_Manager.tile_size;
 image_index = piece_type;
-draw_self();
+draw_sprite_ext(sprite_index, image_index, x, y, 1, 1, 0, c_white, 1);
 
 if (Game_Manager.hovered_piece == self) {
-    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index), x, y, 1, 1, 0, c_white, 1);
+    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index)-1, x, y, 1, 1, 0, c_white, 1);
 }
 
 if (Game_Manager.selected_piece == self) {
-    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index), x, y, 1, 1, 0, c_green, 1);
+    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index)-1, x, y, 1, 1, 0, c_green, 1);
     
     // Reset all tiles' valid_move status
     with (Tile_Obj) {
@@ -25,7 +25,7 @@ if (Game_Manager.selected_piece == self) {
             
             if (!piece) {
                 // Empty square - valid move
-                draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_green, .5);
+                draw_sprite_ext(sprite_index, image_index, check_x, check_y, 1, 1, 0, c_green, .5);
                 with (Tile_Obj) {
                     if (x == other.check_x && y == other.check_y) {
                         valid_move = true;
@@ -33,7 +33,7 @@ if (Game_Manager.selected_piece == self) {
                 }
             } else {
                 // Blocked square - show as red
-                draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_red, .5);
+                draw_sprite_ext(sprite_index, image_index, check_x, check_y, 1, 1, 0, c_red, .5);
                 // Don't set valid_move for blocked squares
             }
         }

@@ -1,22 +1,22 @@
 {
   "$GMObject":"",
-  "%Name":"Chess_Piece_Obj",
+  "%Name":"Tile_Void",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":4,"eventType":6,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":10,"eventType":6,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":38,"eventType":9,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":40,"eventType":9,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"Chess_Piece_Obj",
+  "name":"Tile_Void",
   "overriddenProperties":[],
   "parent":{
-    "name":"Chess Pieces",
-    "path":"folders/Objects/Chess Pieces.yy",
+    "name":"Tiles",
+    "path":"folders/Objects/Tiles.yy",
   },
-  "parentObjectId":null,
+  "parentObjectId":{
+    "name":"Tile_Obj",
+    "path":"objects/Tile_Obj/Tile_Obj.yy",
+  },
   "persistent":false,
   "physicsAngularDamping":0.1,
   "physicsDensity":0.5,
@@ -34,7 +34,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"Tile_Sprite_Void",
+    "path":"sprites/Tile_Sprite_Void/Tile_Sprite_Void.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }

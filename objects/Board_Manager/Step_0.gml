@@ -29,3 +29,34 @@ if room = Pirate_Seas {
 	var back_id = layer_background_get_id(lay_id);
 	layer_background_change(back_id,Pirate_Seas_Bg);
 }
+
+if room = Volcanic_Wasteland {
+	white_textures = [5];
+	black_textures = [0];
+	white_color = make_colour_hsv(13, 255, 227); // orange/red
+	black_color = make_colour_hsv(241, 100, 100); // maroon
+	water_color = c_red;
+	white_alpha = 1;
+	black_alpha = 1;
+	water_alpha = .5;
+	var lay_id = layer_get_id("Background");
+	var back_id = layer_background_get_id(lay_id);
+	layer_background_change(back_id,Volcanic_Wasteland_Bg);
+}
+
+if room = Void_Dimension {
+	white_textures = [6,7,8];
+	black_textures = [0];
+	white_color = make_colour_hsv(195, 56, 121); // lavender
+	black_color = c_black; // black
+	water_color = c_black;
+	white_alpha = 1;
+	black_alpha = 0;
+	water_alpha = .5;
+	var lay_id = layer_get_id("Background");
+	var back_id = layer_background_get_id(lay_id);
+	layer_background_change(back_id,Void_Dimension_Bg);
+	Foreground_Obj.sprite_index = Void_Dimension_Fg;
+	Foreground_Obj.image_alpha = .75;
+}
+

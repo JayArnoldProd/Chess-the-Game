@@ -9,7 +9,7 @@ image_angle_ = 0;
 tile_size = 24;
 
 //tile tile_types
-// 0 = normal, 1 = water
+// -1 = void, 0 = normal, 1 = water,
 tile_type = 0;
 
 //randomize images

@@ -10,6 +10,11 @@ army_x = Player_Army_Manager.x;
 army_y = Player_Army_Manager.y;
 instance_destroy(Player_Army_Manager);
 
+//foreground
+if (!instance_exists(Foreground_Obj)) {
+	instance_create_depth(x,y,-10,Foreground_Obj);
+}
+
 if (!instance_exists(Board_Manager)) {
 	instance_create_depth(x,y,0,Board_Manager);
 	Board_Manager.white_color = white_color;
