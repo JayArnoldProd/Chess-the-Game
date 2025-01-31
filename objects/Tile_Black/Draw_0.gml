@@ -31,5 +31,5 @@ draw_sprite_ext(
     1,
     image_angle_,
     color,
-    1
+    image_alpha
 );

@@ -11,3 +11,6 @@ direction_moves = [
     [0,-1], [1,0], [0,1], [-1,0],  // horizontal/vertical (rook moves)
     [1,-1], [-1,-1], [1,1], [-1,1]  // diagonal (bishop moves)
 ];
+
+// 0 = white, 1 = black, 2 = corrupted
+piece_type = 0;

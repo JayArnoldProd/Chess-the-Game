@@ -7,3 +7,6 @@ valid_moves = [[0,0]];
 direction_moves = [[]];
 
 has_moved = false;
+
+
+piece_type = 0; // 0 = white, 1 = black, 2 = corrupted

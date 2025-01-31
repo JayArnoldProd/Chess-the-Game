@@ -4,6 +4,7 @@ sprite_index = Tile_Sprite_White;
 
 image_speed = 0;
 image_index = 0;
+image_alpha = 1;
 image_angle_ = 0;
 
 //tile tile_types

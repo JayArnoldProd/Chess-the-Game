@@ -14,9 +14,11 @@ if (instance_exists(Board_Manager)) {
     switch (tile_type) {
         case 0: //normal
             color = Board_Manager.white_color;
+			image_alpha = Board_Manager.white_alpha;
             break;
         case 1: //water
             color = Board_Manager.water_color;
+			image_alpha = Board_Manager.water_alpha;
             break;
     }
 }

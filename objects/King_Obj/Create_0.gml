@@ -5,6 +5,9 @@ image_speed = 0;
 can_move_through_pieces = false;
 has_moved = false;
 
+// 0 = white, 1 = black, 2 = corrupted
+piece_type = 0;
+
 // All possible one-square moves around the king
 valid_moves = [
     [0,-1],  // up

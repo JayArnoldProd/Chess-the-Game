@@ -8,3 +8,6 @@ can_move_through_pieces = false;
 valid_moves = [[0,-1],[0,-2]];
 
 has_moved = false;
+
+// 0 = white, 1 = black, 2 = corrupted
+piece_type = 0;

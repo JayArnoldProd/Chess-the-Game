@@ -1,13 +1,14 @@
 // Chess_Piece_Obj Draw
 tile_size = Board_Manager.tile_size;
+image_index = piece_type;
 draw_self();
 
 if (Game_Manager.hovered_piece == self) {
-    draw_sprite_ext(sprite_index, 1, x, y, 1, 1, 0, c_white, 1);
+    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index), x, y, 1, 1, 0, c_white, 1);
 }
 
 if (Game_Manager.selected_piece == self) {
-    draw_sprite_ext(sprite_index, 1, x, y, 1, 1, 0, c_green, 1);
+    draw_sprite_ext(sprite_index, sprite_get_number(sprite_index), x, y, 1, 1, 0, c_green, 1);
     
     // Reset all tiles' valid_move status
     with (Tile_Obj) {

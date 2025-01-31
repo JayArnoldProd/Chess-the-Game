@@ -3,6 +3,7 @@ white = false;
 valid_move = false;
 image_speed = 0;
 image_index = 0;
+image_alpha = 1;
 image_angle_ = 0;
 
 tile_size = 24;
