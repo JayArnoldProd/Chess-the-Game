@@ -46,7 +46,7 @@
     {"name":"Tile_Void","order":3,"path":"objects/Tile_Void/Tile_Void.yy",},
     {"name":"Tile_White","order":2,"path":"objects/Tile_White/Tile_White.yy",},
     {"name":"Top_Row","order":2,"path":"objects/Top_Row/Top_Row.yy",},
-    {"name":"Pirate_Seas","order":2,"path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
+    {"name":"Pirate_Seas","order":5,"path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
     {"name":"Ruined_Overworld","order":1,"path":"rooms/Ruined_Overworld/Ruined_Overworld.yy",},
     {"name":"Void_Dimension","order":4,"path":"rooms/Void_Dimension/Void_Dimension.yy",},
     {"name":"Volcanic_Wasteland","order":3,"path":"rooms/Volcanic_Wasteland/Volcanic_Wasteland.yy",},
