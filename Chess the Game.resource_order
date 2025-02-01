@@ -49,6 +49,7 @@
     {"name":"Pirate_Seas","order":5,"path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
     {"name":"Ruined_Overworld","order":1,"path":"rooms/Ruined_Overworld/Ruined_Overworld.yy",},
     {"name":"Void_Dimension","order":4,"path":"rooms/Void_Dimension/Void_Dimension.yy",},
+    {"name":"Volcanic_Wasteland_Boss","order":6,"path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},
     {"name":"Volcanic_Wasteland","order":3,"path":"rooms/Volcanic_Wasteland/Volcanic_Wasteland.yy",},
     {"name":"Army_Manager_Sprite","order":6,"path":"sprites/Army_Manager_Sprite/Army_Manager_Sprite.yy",},
     {"name":"Bishop_Sprite","order":2,"path":"sprites/Bishop_Sprite/Bishop_Sprite.yy",},

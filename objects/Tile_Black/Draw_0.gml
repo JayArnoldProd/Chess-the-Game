@@ -2,6 +2,12 @@
 var center_x = x;
 var center_y = y;
 
+if instance_exists(Board_Manager) {
+	if Board_Manager.black_random_rotate = false {
+		image_angle_ = 0;
+	}
+}
+
 // Adjust center based on rotation
 switch (image_angle_) {
     case 0:   // No rotation

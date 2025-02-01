@@ -14,3 +14,8 @@ tile_type = 0;
 
 //randomize images
 randomized = false;
+
+set_appearance = false;
+
+grid_x = 0;
+grid_y = 0;

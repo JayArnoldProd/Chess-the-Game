@@ -117,6 +117,25 @@ object_locations = [
 ]
 }
 
+if room = Volcanic_Wasteland_Boss {
+object_locations = [
+	[
+		[ // add spawn tables here
+			[ 0, 0, 0, 0, 0, 0, 0, 0, //1
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0,
+			  0, 0, 0, 0, 0, 0, 0, 0]
+			//, add alternative spawn tables here
+		]
+		//, you can add additional spawn tables to separate objects if you want
+	]
+]
+}
+
 if room = Void_Dimension {
 object_locations = [
 	[

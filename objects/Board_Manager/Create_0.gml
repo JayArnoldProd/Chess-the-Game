@@ -10,6 +10,18 @@ water_color = c_aqua;
 white_alpha = 1;
 black_alpha = 1;
 water_alpha = 1;
+black_random_rotate = true;
+white_random_rotate = true;
+
+ // row/column/specific tile, 
+ //row/column number (0 for specific tile, 
+ //blend color, 
+ //alpha
+ //sprite_index, 
+ //random rotation?
+ 
+special_tile_textures = [
+]
 
 if (!instance_exists(Cursor_Obj)) {
 	instance_create_depth(mouse_x,mouse_y,-2,Cursor_Obj);

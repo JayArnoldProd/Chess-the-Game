@@ -12,3 +12,8 @@ image_angle_ = 0;
 tile_type = 0;
 
 valid_move = false;
+
+set_appearance = false;
+
+grid_x = 0;
+grid_y = 0;
