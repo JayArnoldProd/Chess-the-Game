@@ -21,5 +21,9 @@ if (!instance_exists(Board_Manager)) {
 	Board_Manager.black_color = black_color;
 }
 
+if (!instance_exists(Object_Manager)) {
+	instance_create_depth(x,y,0,Object_Manager);
+}
+
 //recreate army manager
 instance_create_depth(army_x,army_y,0,Player_Army_Manager);
