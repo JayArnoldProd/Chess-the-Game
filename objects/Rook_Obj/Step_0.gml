@@ -1,5 +1,5 @@
 //Rook_Obj Step
-//set size
+
 if instance_exists(Board_Manager) {
 	tile_size = Board_Manager.tile_size;
 }
@@ -39,3 +39,5 @@ if (Game_Manager.selected_piece == self) {
         }
     }
 }
+
+event_inherited();

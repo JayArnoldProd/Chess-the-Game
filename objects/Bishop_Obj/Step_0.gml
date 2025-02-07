@@ -38,3 +38,5 @@ if (Game_Manager.selected_piece == self) {
         }
     }
 }
+
+event_inherited();

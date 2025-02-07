@@ -74,6 +74,7 @@
     {"id":{"name":"Void_Dimension","path":"rooms/Void_Dimension/Void_Dimension.yy",},},
     {"id":{"name":"Volcanic_Wasteland_Boss","path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},},
     {"id":{"name":"Volcanic_Wasteland","path":"rooms/Volcanic_Wasteland/Volcanic_Wasteland.yy",},},
+    {"id":{"name":"restore_normal_moves","path":"scripts/restore_normal_moves/restore_normal_moves.yy",},},
     {"id":{"name":"Army_Manager_Sprite","path":"sprites/Army_Manager_Sprite/Army_Manager_Sprite.yy",},},
     {"id":{"name":"Bishop_Sprite","path":"sprites/Bishop_Sprite/Bishop_Sprite.yy",},},
     {"id":{"name":"Bottom_Row_Sprite","path":"sprites/Bottom_Row_Sprite/Bottom_Row_Sprite.yy",},},

@@ -1,5 +1,5 @@
-// In Chess_Piece_Obj Left_Pressed event:
-if (Game_Manager.selected_piece != noone && Game_Manager.selected_piece != self) {
+// In Game_Manager KeyPress event for Escape key:
+if (Game_Manager.selected_piece != noone) {
     var piece = Game_Manager.selected_piece;
     if (piece.stepping_chain > 0) {
         // Revert the piece to its original turn position:
@@ -24,14 +24,4 @@ if (Game_Manager.selected_piece != noone && Game_Manager.selected_piece != self)
         Game_Manager.selected_piece = noone;
         show_debug_message("Stepping stone sequence aborted; piece returned to its original turn position and has_moved restored.");
     }
-
-} else if (Game_Manager.selected_piece == noone) {
-    // Record the starting position for the turn:
-    original_turn_x = x;
-    original_turn_y = y;
-	original_has_moved = has_moved;
 }
-
-// Now, select this piece (even if switching pieces, you'll cancel the other one first):
-Game_Manager.selected_piece = self;
-
