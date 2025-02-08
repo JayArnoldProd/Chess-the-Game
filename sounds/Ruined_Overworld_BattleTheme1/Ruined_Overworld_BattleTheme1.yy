@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"Ruined_Overworld_BattleTheme1",
+  "audioGroupId":{
+    "name":"AG_MUSIC",
+    "path":"audiogroups/AG_MUSIC",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":1,
+  "conversionMode":0,
+  "duration":119.680565,
+  "name":"Ruined_Overworld_BattleTheme1",
+  "parent":{
+    "name":"Music",
+    "path":"folders/Sounds/Music.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"Ruined_Overworld_BattleTheme1.ogg",
+  "type":1,
+  "volume":1.0,
+}

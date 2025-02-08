@@ -37,11 +37,26 @@ if (valid_move and (Game_Manager.selected_piece != noone)) {
     }
     else {
         // --- NORMAL MOVE PROCESSING ---
-        piece.x = x;
-        piece.y = y;
-        piece.has_moved = true;
-        Game_Manager.selected_piece = noone;
-        valid_move = false;
+		piece.x = x;
+		piece.y = y;
+		piece.has_moved = true;
+
+		// Check for water tile:
+		if (tile_type == 1) { // water tile
+		    // If there is no bridge at an offset position
+		    if (!instance_position(x + tile_size/4, y + tile_size/4, Bridge_Obj)) {
+		        instance_destroy(piece);
+		    }
+		}
+
+		// Check for void tile:
+		if (tile_type == -1) { // void tile
+		    instance_destroy(piece);
+		}
+
+		// End move and turn:
+		Game_Manager.selected_piece = noone;
+		valid_move = false;
     }
 }
 

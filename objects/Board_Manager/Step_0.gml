@@ -80,6 +80,22 @@ if room = Volcanic_Wasteland_Boss {
 	]
 }
 
+if room = Twisted_Carnival {
+	white_textures = [15,16,17,18];
+	black_textures = [0];
+	white_color = make_colour_hsv(85, 118, 88); // green
+	black_color = make_colour_hsv(195, 173, 135); // purple
+	water_color = c_green;
+	white_alpha = 1;
+	black_alpha = 1;
+	water_alpha = .5;
+	black_random_rotate = false;
+	white_random_rotate = false;
+	var lay_id = layer_get_id("Background");
+	var back_id = layer_background_get_id(lay_id);
+	layer_background_change(back_id,Twisted_Carnival_Bg);
+}
+
 
 if room = Void_Dimension {
 	white_textures = [6,7,8];

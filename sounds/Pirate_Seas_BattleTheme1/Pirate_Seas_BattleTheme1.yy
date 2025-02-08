@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"Pirate_Seas_BattleTheme1",
+  "audioGroupId":{
+    "name":"AG_MUSIC",
+    "path":"audiogroups/AG_MUSIC",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":1,
+  "conversionMode":0,
+  "duration":54.408775,
+  "name":"Pirate_Seas_BattleTheme1",
+  "parent":{
+    "name":"Music",
+    "path":"folders/Sounds/Music.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"Pirate_Seas_BattleTheme1.wav",
+  "type":1,
+  "volume":1.0,
+}

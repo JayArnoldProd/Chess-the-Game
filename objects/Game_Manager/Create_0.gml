@@ -15,6 +15,13 @@ if (!instance_exists(Foreground_Obj)) {
 	instance_create_depth(x,y,-10,Foreground_Obj);
 }
 
+//background
+if (room = Twisted_Carnival) {
+	if (!instance_exists(Background_Obj)) {
+		instance_create_depth(x,y,-10,Background_Obj);
+	}
+}
+
 if (!instance_exists(Board_Manager)) {
 	instance_create_depth(x,y,0,Board_Manager);
 	Board_Manager.white_color = white_color;
@@ -23,6 +30,10 @@ if (!instance_exists(Board_Manager)) {
 
 if (!instance_exists(Object_Manager)) {
 	instance_create_depth(x,y,0,Object_Manager);
+}
+
+if (!instance_exists(Audio_Manager)) {
+	instance_create_depth(x,y,0,Audio_Manager);
 }
 
 //recreate army manager

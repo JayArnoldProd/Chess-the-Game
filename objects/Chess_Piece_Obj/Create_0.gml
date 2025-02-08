@@ -8,7 +8,6 @@ direction_moves = [[]];
 
 has_moved = false;
 
-
 piece_type = 0; // 0 = white, 1 = black, 2 = corrupted
 
 // Extra–move (stepping stone) state initialization
@@ -27,3 +26,16 @@ last_y = y;
 original_turn_x = x;
 original_turn_y = y;
 original_has_moved = has_moved; 
+
+// Chess_Piece_Obj Create Event
+
+// Create an audio emitter for this piece
+audio_emitter = audio_emitter_create();
+
+// Position the emitter at the piece's location
+audio_emitter_position(audio_emitter, x, y, 0);
+
+// Set default falloff settings for 2D spatial audio
+audio_emitter_falloff(audio_emitter, 32, 256, 1); // Min distance, Max distance, Exponent
+audio_emitter_velocity(audio_emitter, 0, 0, 0);   // No velocity changes needed
+audio_emitter_gain(audio_emitter, 1);             // Full volume

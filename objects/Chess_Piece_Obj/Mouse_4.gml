@@ -1,5 +1,8 @@
 // In Chess_Piece_Obj Left_Pressed event:
+if piece_type = 0 {
+
 if (Game_Manager.selected_piece != noone && Game_Manager.selected_piece != self) {
+	
     var piece = Game_Manager.selected_piece;
     if (piece.stepping_chain > 0) {
         // Revert the piece to its original turn position:
@@ -32,6 +35,12 @@ if (Game_Manager.selected_piece != noone && Game_Manager.selected_piece != self)
 	original_has_moved = has_moved;
 }
 
+// Play selection sound when a piece is selected
+if (Game_Manager.selected_piece != self) {
+	audio_play_sound(Piece_Selection_SFX, 1, false);
+}
+
 // Now, select this piece (even if switching pieces, you'll cancel the other one first):
 Game_Manager.selected_piece = self;
 
+}
