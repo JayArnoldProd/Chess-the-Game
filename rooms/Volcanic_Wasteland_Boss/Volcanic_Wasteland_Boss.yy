@@ -74,6 +74,7 @@
     {"name":"inst_21F9CB44_2_3","path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},
     {"name":"inst_246F7F87_2_3","path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},
     {"name":"inst_5F150770_2_3","path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},
+    {"name":"inst_7747B6E","path":"rooms/Volcanic_Wasteland_Boss/Volcanic_Wasteland_Boss.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -146,6 +147,7 @@
         {"$GMRInstance":"v1","%Name":"inst_21F9CB44_2_3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_21F9CB44_2_3","objectId":{"name":"Game_Manager","path":"objects/Game_Manager/Game_Manager.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":0.0,},
         {"$GMRInstance":"v1","%Name":"inst_246F7F87_2_3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_246F7F87_2_3","objectId":{"name":"Top_Row","path":"objects/Top_Row/Top_Row.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":24.0,},
         {"$GMRInstance":"v1","%Name":"inst_5F150770_2_3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_5F150770_2_3","objectId":{"name":"Bottom_Row","path":"objects/Bottom_Row/Bottom_Row.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":192.0,},
+        {"$GMRInstance":"v1","%Name":"inst_7747B6E","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_7747B6E","objectId":{"name":"Enemy_Army_Manager","path":"objects/Enemy_Army_Manager/Enemy_Army_Manager.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":24.0,"y":24.0,},
       ],"layers":[],"name":"Instances","properties":[
         {"name":"g_Distort1Speed","type":0,"value":"0.01",},
         {"name":"g_Distort2Speed","type":0,"value":"0.025",},

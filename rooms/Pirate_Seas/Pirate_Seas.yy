@@ -77,6 +77,7 @@
     {"name":"inst_6423A7C3","path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
     {"name":"inst_3CF28B70","path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
     {"name":"inst_17B08F4F","path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
+    {"name":"inst_33600BBE","path":"rooms/Pirate_Seas/Pirate_Seas.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -152,6 +153,7 @@
         {"$GMRInstance":"v1","%Name":"inst_6423A7C3","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_6423A7C3","objectId":{"name":"Ocean_Row","path":"objects/Ocean_Row/Ocean_Row.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":120.0,},
         {"$GMRInstance":"v1","%Name":"inst_3CF28B70","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_3CF28B70","objectId":{"name":"Bridge_Row","path":"objects/Bridge_Row/Bridge_Row.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":24.0,"y":96.0,},
         {"$GMRInstance":"v1","%Name":"inst_17B08F4F","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_17B08F4F","objectId":{"name":"Ocean_Row","path":"objects/Ocean_Row/Ocean_Row.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":0.0,"y":96.0,},
+        {"$GMRInstance":"v1","%Name":"inst_33600BBE","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_33600BBE","objectId":{"name":"Enemy_Army_Manager","path":"objects/Enemy_Army_Manager/Enemy_Army_Manager.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":24.0,"y":24.0,},
       ],"layers":[],"name":"Instances","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRBackgroundLayer":"","%Name":"Background","animationFPS":15.0,"animationSpeedType":0,"colour":4290822336,"depth":100,"effectEnabled":true,"effectType":"_filter_underwater","gridX":32,"gridY":32,"hierarchyFrozen":false,"hspeed":0.0,"htiled":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"name":"Background","properties":[
         {"name":"g_Distort1Speed","type":0,"value":"0.014",},

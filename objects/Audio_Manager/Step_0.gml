@@ -1,6 +1,4 @@
-// Audio_Manager Create Event
-audio_group_load(AG_SFX);
-audio_group_load(AG_MUSIC);
+// Audio_Manager Step Event
 
 audio_group_set_gain(AG_MUSIC,.5,0);
 
@@ -11,7 +9,7 @@ audio_listener_position(room_width / 2, room_height / 2, 0);
 audio_listener_orientation(0, 1, 0, 0, 0, 1); // Forward vector (0,1,0), Up vector (0,0,1)
 
 // Set default drop-off values for 2D audio
-audio_falloff_set_model(audio_falloff_exponent_distance);
+audio_falloff_set_model(audio_falloff_linear_distance);
 
 music = noone;
 

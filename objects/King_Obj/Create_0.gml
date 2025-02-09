@@ -1,5 +1,7 @@
 // King_Obj Create
 event_inherited();
+piece_id = "king";
+health_ = 1;
 //Movement
 can_move_through_pieces = false;
 has_moved = false;

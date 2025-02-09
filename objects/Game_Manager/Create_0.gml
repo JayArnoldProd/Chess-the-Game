@@ -1,9 +1,14 @@
 //Game_Manager Create
+moveCancelled = false;
+
 white_color = make_color_hsv(0,0,255);
 black_color = make_color_hsv(0,0,40);
 
 selected_piece = noone;
 hovered_piece = noone;
+
+// Initialize the turn variable (0 = player's turn, 1 = enemy's turn)
+turn = 0;
 
 //save army position and delete army manager
 army_x = Player_Army_Manager.x;

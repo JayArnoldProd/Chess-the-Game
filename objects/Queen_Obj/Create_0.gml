@@ -1,6 +1,7 @@
 // Queen_Obj Create
 event_inherited();
-
+piece_id = "queen";
+health_ = 1;
 can_move_through_pieces = false;
 max_distance = 7;
 

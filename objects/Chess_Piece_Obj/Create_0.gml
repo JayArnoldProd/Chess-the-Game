@@ -9,6 +9,10 @@ direction_moves = [[]];
 has_moved = false;
 
 piece_type = 0; // 0 = white, 1 = black, 2 = corrupted
+piece_id = "pawn";
+
+health_ = 1;
+original_depth = depth;
 
 // Extra–move (stepping stone) state initialization
 extra_move_pending = false;   // (alternative name: not used beyond activation)
@@ -36,6 +40,6 @@ audio_emitter = audio_emitter_create();
 audio_emitter_position(audio_emitter, x, y, 0);
 
 // Set default falloff settings for 2D spatial audio
-audio_emitter_falloff(audio_emitter, 32, 256, 1); // Min distance, Max distance, Exponent
+audio_emitter_falloff(audio_emitter, 32, 400, 1); // Min distance, Max distance, Exponent
 audio_emitter_velocity(audio_emitter, 0, 0, 0);   // No velocity changes needed
 audio_emitter_gain(audio_emitter, 1);             // Full volume

@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"Piece_Drowning_SFX",
+  "audioGroupId":{
+    "name":"AG_SFX",
+    "path":"audiogroups/AG_SFX",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":1,
+  "conversionMode":0,
+  "duration":0.639433,
+  "name":"Piece_Drowning_SFX",
+  "parent":{
+    "name":"Pieces",
+    "path":"folders/Sounds/Pieces.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"Piece_Drowning_SFX.ogg",
+  "type":0,
+  "volume":1.0,
+}

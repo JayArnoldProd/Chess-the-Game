@@ -1,7 +1,8 @@
 // Bishop_Obj Create
 
 event_inherited();
-
+piece_id = "bishop";
+health_ = 1;
 can_move_through_pieces = false;
 
 // Instead of a fixed valid_moves array, we'll calculate valid moves dynamically

@@ -1,5 +1,7 @@
 // Rook_Obj Create
 event_inherited();
+piece_id = "rook";
+health_ = 1;
 // Movement
 can_move_through_pieces = false;
 max_distance = 7;

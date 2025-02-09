@@ -1,4 +1,7 @@
-// Only check if not already in an extra–move chain
+// Chess_Piece_Obj Step:
+
+audio_emitter_position(audio_emitter, x, y, 0);
+
 last_x = x;
 last_y = y;
 
@@ -18,8 +21,6 @@ if (stepping_chain == 0) {
         show_debug_message("Stepping stone activated! Extra move phase 1 available.");
     }
 }
-
-
 
 // Only override moves if in Phase 1 of the extra move (stepping_chain == 2)
 if (stepping_chain == 2) {
