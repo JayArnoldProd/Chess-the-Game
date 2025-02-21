@@ -10,6 +10,10 @@ hovered_piece = noone;
 // Initialize the turn variable (0 = player's turn, 1 = enemy's turn)
 turn = 0;
 
+en_passant_target_x = -1;
+en_passant_target_y = -1;
+en_passant_pawn = noone;
+
 //save army position and delete army manager
 army_x = Player_Army_Manager.x;
 army_y = Player_Army_Manager.y;

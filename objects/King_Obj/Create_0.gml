@@ -5,7 +5,7 @@ health_ = 1;
 //Movement
 can_move_through_pieces = false;
 has_moved = false;
-
+castle_moves = [];
 
 // All possible one-square moves around the king
 valid_moves = [
