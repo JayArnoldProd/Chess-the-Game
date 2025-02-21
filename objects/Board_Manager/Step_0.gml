@@ -50,6 +50,22 @@ if room = Volcanic_Wasteland {
 	layer_background_change(back_id,Volcanic_Wasteland_Bg);
 }
 
+if room = Fear_Factory {
+	white_textures = [13];
+	black_textures = [0];
+	white_color = make_colour_hsv(47, 30, 63); // yellow-grey
+	black_color = make_colour_hsv(0, 0, 35); // dark_grey
+	water_color = c_ltgray;
+	white_alpha = 1;
+	black_alpha = 1;
+	water_alpha = 1;
+	black_random_rotate = false;
+	white_random_rotate = false;
+	var lay_id = layer_get_id("Background");
+	var back_id = layer_background_get_id(lay_id);
+	layer_background_change(back_id,Fear_Factory_Bg);
+}
+
 if room = Volcanic_Wasteland_Boss {
 	white_textures = [10];
 	black_textures = [9];

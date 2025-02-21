@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":1,
   "conversionMode":0,
-  "duration":0.639433,
+  "duration":1.259615,
   "name":"Piece_Drowning_SFX",
   "parent":{
     "name":"Pieces",

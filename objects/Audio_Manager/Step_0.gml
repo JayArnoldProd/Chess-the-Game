@@ -26,6 +26,9 @@ switch (room) {
 	case Volcanic_Wasteland_Boss:
 		music = Volcanic_Wasteland_BossTheme1;
 	break;
+	case Fear_Factory:
+		music = Fear_Factory_BattleTheme1;
+	break;
 	case Twisted_Carnival:
 		music = Twisted_Carnival_BattleTheme1;
 	break;

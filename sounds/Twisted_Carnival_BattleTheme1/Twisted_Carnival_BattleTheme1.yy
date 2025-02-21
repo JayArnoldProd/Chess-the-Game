@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":1,
   "conversionMode":0,
-  "duration":84.62585,
+  "duration":56.42544,
   "name":"Twisted_Carnival_BattleTheme1",
   "parent":{
     "name":"Music",

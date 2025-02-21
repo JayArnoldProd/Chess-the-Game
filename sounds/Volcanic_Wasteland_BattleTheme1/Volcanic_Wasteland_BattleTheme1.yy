@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":1,
   "conversionMode":0,
-  "duration":61.521317,
+  "duration":61.555237,
   "name":"Volcanic_Wasteland_BattleTheme1",
   "parent":{
     "name":"Music",
