@@ -1,9 +1,12 @@
+// King_Obj Draw
+
 // Inherit the parent event
 event_inherited();
 
 // --- Castle Moves Overlay ---
+
 // Only draw castling overlays if this king is selected and castle moves exist.
-if (Game_Manager.selected_piece == self && array_length(castle_moves) > 0) {
+if (Game_Manager.selected_piece == self && array_length(castle_moves) > 0 && !is_moving) {
     for (var i = 0; i < array_length(castle_moves); i++) {
         var move = castle_moves[i];  // Format: [castle_dx, 0, "castle", rook_id]
         // Calculate the target position for castling.

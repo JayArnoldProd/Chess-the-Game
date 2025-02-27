@@ -11,8 +11,6 @@ audio_listener_orientation(0, 1, 0, 0, 0, 1); // Forward vector (0,1,0), Up vect
 // Set default drop-off values for 2D audio
 audio_falloff_set_model(audio_falloff_linear_distance);
 
-music = noone;
-
 switch (room) {
 	case Ruined_Overworld:
 		music = Ruined_Overworld_BattleTheme1;

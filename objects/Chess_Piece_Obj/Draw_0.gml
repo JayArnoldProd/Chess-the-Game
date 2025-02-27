@@ -21,8 +21,8 @@ if (Game_Manager.hovered_piece == self) {
     draw_sprite_ext(sprite_index, sprite_get_number(sprite_index) - 1, x, y, 1, 1, 0, c_white, 1);
 }
 
-// If this piece is selected, draw the valid-move overlay and valid moves.
-if (Game_Manager.selected_piece == self) {
+// Only if this piece is selected AND not animating, draw the valid–move overlays.
+if (Game_Manager.selected_piece == self && !is_moving) {
     // Draw a green overlay on the piece.
     draw_sprite_ext(sprite_index, sprite_get_number(sprite_index) - 1, x, y, 1, 1, 0, c_green, 1);
     

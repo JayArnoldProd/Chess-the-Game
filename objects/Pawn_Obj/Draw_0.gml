@@ -1,12 +1,12 @@
 // -------------------------
 // Pawn_Obj Draw Event
 // -------------------------
+
 // Inherit standard drawing.
 event_inherited();
 
-// --- En Passant Overlay for Pawn ---
-// Only if this pawn is selected.
-if (Game_Manager.selected_piece == self) {
+// Only if this pawn is selected and not moving, draw the en passant overlay.
+if (Game_Manager.selected_piece == self && !is_moving) {
     for (var i = 0; i < array_length(valid_moves); i++) {
         var move = valid_moves[i];
         if (array_length(move) >= 3 && move[2] == "en_passant") {

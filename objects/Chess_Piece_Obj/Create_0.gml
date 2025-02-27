@@ -11,8 +11,10 @@ has_moved = false;
 piece_type = 0; // 0 = white, 1 = black, 2 = corrupted
 piece_id = "pawn";
 
+depth = -1;
 health_ = 1;
 original_depth = depth;
+landing_sound_pending = false;
 
 // Extra–move (stepping stone) state initialization
 extra_move_pending = false;   // (alternative name: not used beyond activation)
@@ -31,7 +33,28 @@ original_turn_x = x;
 original_turn_y = y;
 original_has_moved = has_moved; 
 
-// Chess_Piece_Obj Create Event
+// Animation
+move_start_x = 0;
+move_start_y = 0;
+move_target_x = 0; 
+move_target_y = 0;
+move_progress = 0;
+move_duration = 200;
+is_moving = false;
+move_animation_type = "linear";
+
+pending_capture = noone;
+pending_capture_check = false;
+pending_turn_switch = undefined;
+pending_en_passant = false;
+pending_normal_move = false;
+
+destroy_pending = false;
+destroy_target_x = 0;
+destroy_target_y = 0;
+destroy_tile_type = 0;
+
+landing_sound= Piece_Landing_SFX
 
 // Create an audio emitter for this piece
 audio_emitter = audio_emitter_create();

@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"Trap_Door_SFX",
+  "audioGroupId":{
+    "name":"AG_SFX",
+    "path":"audiogroups/AG_SFX",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":1,
+  "conversionMode":0,
+  "duration":1.100952,
+  "name":"Trap_Door_SFX",
+  "parent":{
+    "name":"World Objects",
+    "path":"folders/Sounds/World Objects.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"Trap_Door_SFX.ogg",
+  "type":0,
+  "volume":1.0,
+}
