@@ -47,3 +47,8 @@ if (!instance_exists(Audio_Manager)) {
 
 //recreate army manager
 instance_create_depth(army_x,army_y,0,Player_Army_Manager);
+
+// Create AI Manager
+//if (!instance_exists(AI_Manager)) {
+//   instance_create_depth(x, y, 0, AI_Manager);
+//

@@ -9,7 +9,7 @@
   "bitRate":128,
   "compression":1,
   "conversionMode":0,
-  "duration":1.100952,
+  "duration":1.120181,
   "name":"Conveyer_SFX_1",
   "parent":{
     "name":"World Objects",
