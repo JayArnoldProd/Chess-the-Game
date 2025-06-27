@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"quick_start_ai",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"quick_start_ai",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_analyze_position_complexity",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_analyze_position_complexity",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

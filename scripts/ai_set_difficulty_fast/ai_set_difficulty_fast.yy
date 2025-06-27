@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_set_difficulty_fast",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_set_difficulty_fast",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

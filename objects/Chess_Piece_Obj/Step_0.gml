@@ -7,7 +7,6 @@ audio_emitter_position(audio_emitter, x, y, 0);
 last_x = x;
 last_y = y;
 
-
 // Set depth based on movement: while moving, set to -2; otherwise, normal depth (-1).
 if (is_moving) {
     depth = -2;
@@ -65,39 +64,42 @@ if (!is_moving) {
 }
 
 // 3. Stepping Stone Activation & Extra-Move Valid Moves
-if (!is_moving) {
-    if (stepping_chain == 0) {
-        var stone = instance_position(x, y, Stepping_Stone_Obj);
-        if (stone != noone) {
-            // Use previous frame’s position as reference.
-            pre_stepping_x = last_x;
-            pre_stepping_y = last_y;
-            
-            extra_move_pending = true;
-            stepping_chain = 2;  // Phase 1 extra move pending.
-            stepping_stone_instance = stone;
-            stone_original_x = stone.x;
-            stone_original_y = stone.y;
-            show_debug_message("Stepping stone activated! Extra move phase 1 available.");
-        }
-    }
-}
-
-// While in extra–move Phase 1, override valid moves to the 8 adjacent directions.
-if (!is_moving && stepping_chain == 2) {
-    valid_moves = [];
-    for (var dx = -1; dx <= 1; dx++) {
-        for (var dy = -1; dy <= 1; dy++) {
-            if (dx != 0 || dy != 0) {
-                array_push(valid_moves, [dx, dy]);
+// ONLY process stepping stone logic if this is NOT an AI piece during AI turn
+if (!(piece_type == 1 && Game_Manager.turn == 1)) {
+    if (!is_moving) {
+        if (stepping_chain == 0) {
+            var stone = instance_position(x, y, Stepping_Stone_Obj);
+            if (stone != noone) {
+                // Use previous frame's position as reference.
+                pre_stepping_x = last_x;
+                pre_stepping_y = last_y;
+                
+                extra_move_pending = true;
+                stepping_chain = 2;  // Phase 1 extra move pending.
+                stepping_stone_instance = stone;
+                stone_original_x = stone.x;
+                stone_original_y = stone.y;
+                show_debug_message("Stepping stone activated! Extra move phase 1 available.");
             }
         }
     }
-}
 
-// Force the piece to remain selected if in any extra–move chain.
-if (stepping_chain > 0) {
-    Game_Manager.selected_piece = self;
+    // While in extra–move Phase 1, override valid moves to the 8 adjacent directions.
+    if (!is_moving && stepping_chain == 2) {
+        valid_moves = [];
+        for (var dx = -1; dx <= 1; dx++) {
+            for (var dy = -1; dy <= 1; dy++) {
+                if (dx != 0 || dy != 0) {
+                    array_push(valid_moves, [dx, dy]);
+                }
+            }
+        }
+    }
+
+    // Force the piece to remain selected if in any extra–move chain.
+    if (stepping_chain > 0) {
+        Game_Manager.selected_piece = self;
+    }
 }
 
 // 4. Deferred Move Finalization (Post-Animation)
@@ -141,8 +143,22 @@ if (!is_moving) {
     
     // Process deferred turn switch.
     if (pending_turn_switch != undefined) {
-        Game_Manager.turn = pending_turn_switch;
-        pending_turn_switch = undefined;
+        // Don't switch turns if this is an AI piece in a stepping stone sequence
+        var skip_turn_switch = false;
+        
+        if (piece_type == 1 && stepping_chain > 0) {
+            // This is an AI piece in stepping stone sequence - check if AI is handling it
+            if (instance_exists(AI_Manager) && 
+                variable_instance_exists(AI_Manager, "ai_stepping_phase") && 
+                AI_Manager.ai_stepping_phase > 0) {
+                skip_turn_switch = true;
+                show_debug_message("Prevented turn switch during AI stepping stone sequence");
+            }
+        }
+        
+        if (!skip_turn_switch) {
+            Game_Manager.turn = pending_turn_switch;
+            pending_turn_switch = undefined;
+        }
     }
 }
-

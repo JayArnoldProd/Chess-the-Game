@@ -1,109 +1,28 @@
-// AI_Manager Create Event
+/// AI_Manager Create Event - WITH STEPPING STONE SUPPORT
+show_debug_message("AI_Manager: Starting AI with stepping stone support...");
 
-// AI Configuration
+// Basic AI settings
 ai_enabled = true;
-ai_depth = 2; // Search depth (increase for stronger play, decrease for faster moves)
-ai_thinking = false;
-ai_move_delay = 60; // Frames to wait before making move (for visual effect)
-ai_move_timer = 0;
+ai_move_delay = 30;
 
-// Piece values for evaluation
-piece_values = {
-    "pawn": 100,
-    "knight": 320,
-    "bishop": 330,
-    "rook": 500,
-    "queen": 900,
-    "king": 20000
-};
+// Stepping stone variables
+ai_stepping_phase = 0; // 0 = normal, 1 = phase1 pending, 2 = phase2 pending
+ai_stepping_piece = noone;
 
-// Positional piece-square tables (from white's perspective)
-// Pawn table
-pawn_table = [
-    [0,  0,  0,  0,  0,  0,  0,  0],
-    [50, 50, 50, 50, 50, 50, 50, 50],
-    [10, 10, 20, 30, 30, 20, 10, 10],
-    [5,  5, 10, 25, 25, 10,  5,  5],
-    [0,  0,  0, 20, 20,  0,  0,  0],
-    [5, -5,-10,  0,  0,-10, -5,  5],
-    [5, 10, 10,-20,-20, 10, 10,  5],
-    [0,  0,  0,  0,  0,  0,  0,  0]
-];
+// Simple piece values
+piece_values = ds_map_create();
+ds_map_add(piece_values, "pawn", 100);
+ds_map_add(piece_values, "knight", 320);
+ds_map_add(piece_values, "bishop", 330);
+ds_map_add(piece_values, "rook", 500);
+ds_map_add(piece_values, "queen", 900);
+ds_map_add(piece_values, "king", 20000);
 
-// Knight table
-knight_table = [
-    [-50,-40,-30,-30,-30,-30,-40,-50],
-    [-40,-20,  0,  0,  0,  0,-20,-40],
-    [-30,  0, 10, 15, 15, 10,  0,-30],
-    [-30,  5, 15, 20, 20, 15,  5,-30],
-    [-30,  0, 15, 20, 20, 15,  0,-30],
-    [-30,  5, 10, 15, 15, 10,  5,-30],
-    [-40,-20,  0,  5,  5,  0,-20,-40],
-    [-50,-40,-30,-30,-30,-30,-40,-50]
-];
+// Simple difficulty settings
+search_depth = 1;
+max_moves_to_consider = 8;
 
-// Bishop table
-bishop_table = [
-    [-20,-10,-10,-10,-10,-10,-10,-20],
-    [-10,  0,  0,  0,  0,  0,  0,-10],
-    [-10,  0,  5, 10, 10,  5,  0,-10],
-    [-10,  5,  5, 10, 10,  5,  5,-10],
-    [-10,  0, 10, 10, 10, 10,  0,-10],
-    [-10, 10, 10, 10, 10, 10, 10,-10],
-    [-10,  5,  0,  0,  0,  0,  5,-10],
-    [-20,-10,-10,-10,-10,-10,-10,-20]
-];
+// Initialize global debug variable
+global.ai_debug_visible = true;
 
-// Rook table
-rook_table = [
-    [0,  0,  0,  0,  0,  0,  0,  0],
-    [5, 10, 10, 10, 10, 10, 10,  5],
-    [-5,  0,  0,  0,  0,  0,  0, -5],
-    [-5,  0,  0,  0,  0,  0,  0, -5],
-    [-5,  0,  0,  0,  0,  0,  0, -5],
-    [-5,  0,  0,  0,  0,  0,  0, -5],
-    [-5,  0,  0,  0,  0,  0,  0, -5],
-    [0,  0,  0,  5,  5,  0,  0,  0]
-];
-
-// Queen table
-queen_table = [
-    [-20,-10,-10, -5, -5,-10,-10,-20],
-    [-10,  0,  0,  0,  0,  0,  0,-10],
-    [-10,  0,  5,  5,  5,  5,  0,-10],
-    [-5,  0,  5,  5,  5,  5,  0, -5],
-    [0,  0,  5,  5,  5,  5,  0, -5],
-    [-10,  5,  5,  5,  5,  5,  0,-10],
-    [-10,  0,  5,  0,  0,  0,  0,-10],
-    [-20,-10,-10, -5, -5,-10,-10,-20]
-];
-
-// King middle game table
-king_middle_table = [
-    [-30,-40,-40,-50,-50,-40,-40,-30],
-    [-30,-40,-40,-50,-50,-40,-40,-30],
-    [-30,-40,-40,-50,-50,-40,-40,-30],
-    [-30,-40,-40,-50,-50,-40,-40,-30],
-    [-20,-30,-30,-40,-40,-30,-30,-20],
-    [-10,-20,-20,-20,-20,-20,-20,-10],
-    [20, 20,  0,  0,  0,  0, 20, 20],
-    [20, 30, 10,  0,  0, 10, 30, 20]
-];
-
-// King endgame table
-king_end_table = [
-    [-50,-40,-30,-20,-20,-30,-40,-50],
-    [-30,-20,-10,  0,  0,-10,-20,-30],
-    [-30,-10, 20, 30, 30, 20,-10,-30],
-    [-30,-10, 30, 40, 40, 30,-10,-30],
-    [-30,-10, 30, 40, 40, 30,-10,-30],
-    [-30,-10, 20, 30, 30, 20,-10,-30],
-    [-30,-30,  0,  0,  0,  0,-30,-30],
-    [-50,-30,-30,-30,-30,-30,-30,-50]
-];
-
-// Transposition table for caching evaluations
-transposition_table = ds_map_create();
-
-// Best move found by AI
-best_move = undefined;
+show_debug_message("AI_Manager: Ready with animation and stepping stone support");

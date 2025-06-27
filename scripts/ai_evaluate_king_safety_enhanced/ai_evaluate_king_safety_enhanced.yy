@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_evaluate_king_safety_enhanced",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_evaluate_king_safety_enhanced",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

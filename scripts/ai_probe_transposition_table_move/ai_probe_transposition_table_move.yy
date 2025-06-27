@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_probe_transposition_table_move",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_probe_transposition_table_move",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

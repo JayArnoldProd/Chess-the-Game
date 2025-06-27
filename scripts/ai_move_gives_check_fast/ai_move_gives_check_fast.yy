@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_move_gives_check_fast",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_move_gives_check_fast",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_detect_infinite_loop",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_detect_infinite_loop",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

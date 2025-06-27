@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"check_for_loops",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"check_for_loops",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

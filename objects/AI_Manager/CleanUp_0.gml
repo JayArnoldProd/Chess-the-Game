@@ -1,6 +1,10 @@
-// AI_Manager Cleanup Event
-
-// Clean up transposition table
-if (ds_exists(transposition_table, ds_type_map)) {
-    ds_map_destroy(transposition_table);
+/// AI_Manager Cleanup Event - WITH STEPPING STONE CLEANUP
+if (ds_exists(piece_values, ds_type_map)) {
+    ds_map_destroy(piece_values);
 }
+
+// Clean up stepping stone references
+ai_stepping_piece = noone;
+ai_stepping_phase = 0;
+
+show_debug_message("AI_Manager: Cleaned up");

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"force_ai_move_now",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"force_ai_move_now",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

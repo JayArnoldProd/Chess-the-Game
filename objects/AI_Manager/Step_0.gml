@@ -1,72 +1,74 @@
-// AI_Manager Step Event - Improved with Error Handling
+/// AI_Manager Step Event - SIMPLIFIED (No stepping stone handling)
+if (!ai_enabled || Game_Manager.turn != 1) {
+    exit; // Only run on AI's turn
+}
 
-// Only act when it's black's turn and AI is enabled
-if (!ai_enabled || Game_Manager.turn != 1) exit;
-
-// Don't act if any piece is currently moving
-var pieces_moving = false;
+// Don't move while pieces are animating
+var any_moving = false;
 with (Chess_Piece_Obj) {
-    if (instance_exists(id) && is_moving) {
-        pieces_moving = true;
+    if (is_moving) {
+        any_moving = true;
         break;
     }
 }
-if (pieces_moving) exit;
+if (any_moving) exit;
 
-// Start thinking if not already thinking
-if (!ai_thinking) {
-    ai_thinking = true;
-    ai_move_timer = ai_move_delay;
-    
-    show_debug_message("AI is thinking...");
-    
-    try {
-        // Update all piece valid moves before thinking
-        ai_update_piece_valid_moves();
-        
-        // Check if we have any legal moves
-        var legal_moves = ai_get_legal_moves(1);
-        show_debug_message("AI has " + string(array_length(legal_moves)) + " legal moves");
-        
-        if (array_length(legal_moves) == 0) {
-            show_debug_message("AI has no legal moves!");
-            ai_thinking = false;
-            best_move = undefined;
-            exit;
-        }
-        
-        // Find the best move using minimax
-        best_move = ai_find_best_move(ai_depth);
-        
-        if (best_move != undefined) {
-            show_debug_message("AI found move from " + string(best_move.from_x) + "," + string(best_move.from_y) + " to " + string(best_move.to_x) + "," + string(best_move.to_y));
-        } else {
-            show_debug_message("AI could not find a move!");
-        }
-    } catch (error) {
-        show_debug_message("AI Error during thinking: " + string(error));
-        ai_thinking = false;
-        best_move = undefined;
-        exit;
-    }
+// Initialize delay
+if (!variable_instance_exists(id, "ai_move_delay")) ai_move_delay = 30;
+
+// Wait for delay
+if (ai_move_delay > 0) {
+    ai_move_delay--;
+    exit;
 }
 
-// Execute move after delay
-if (ai_thinking && ai_move_timer > 0) {
-    ai_move_timer--;
-    if (ai_move_timer <= 0) {
-        try {
-            if (best_move != undefined) {
-                show_debug_message("AI executing move...");
-                ai_execute_move(best_move);
-                show_debug_message("AI move completed");
-            } else {
-                show_debug_message("AI has no move to execute");
-            }
-        } catch (error) {
-            show_debug_message("AI Error during move execution: " + string(error));
-        }
-        ai_thinking = false;
-        best_move = undefined;
+// Get legal moves and pick one
+try {
+    var legal_moves = ai_get_legal_moves_fast(1);
+    
+    if (array_length(legal_moves) == 0) {
+        Game_Manager.turn = 0;
+        show_debug_message("AI: No legal moves available (checkmate or stalemate)");
+        exit;
     }
+    
+    // Sort moves by score
+    var scored_moves = [];
+    for (var i = 0; i < array_length(legal_moves); i++) {
+        var move = legal_moves[i];
+        if (!instance_exists(move.piece)) continue;
+        
+        move.score = ai_score_move_fast(move);
+        array_push(scored_moves, move);
+    }
+    
+    // Sort by score (highest first)
+    for (var i = 0; i < array_length(scored_moves) - 1; i++) {
+        for (var j = i + 1; j < array_length(scored_moves); j++) {
+            if (scored_moves[j].score > scored_moves[i].score) {
+                var temp = scored_moves[i];
+                scored_moves[i] = scored_moves[j];
+                scored_moves[j] = temp;
+            }
+        }
+    }
+    
+    // Pick from top moves
+    var moves_to_consider = min(array_length(scored_moves), max_moves_to_consider);
+    var best_move = scored_moves[irandom(max(0, moves_to_consider - 1))]; // Some randomness
+    
+    // Execute the move
+    if (instance_exists(best_move.piece)) {
+        ai_execute_move_simple(best_move);
+        show_debug_message("AI: Moved " + best_move.piece_id + " (score: " + string(best_move.score) + ")");
+    } else {
+        Game_Manager.turn = 0;
+    }
+    
+    ai_move_delay = 30;
+    
+} catch (error) {
+    show_debug_message("AI Error: " + string(error));
+    Game_Manager.turn = 0;
+    ai_move_delay = 60;
 }

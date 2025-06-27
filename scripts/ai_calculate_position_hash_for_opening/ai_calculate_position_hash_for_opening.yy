@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_calculate_position_hash_for_opening",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_calculate_position_hash_for_opening",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

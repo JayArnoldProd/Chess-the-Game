@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"verify_keyboard_controls",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"verify_keyboard_controls",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
