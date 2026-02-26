@@ -1,5 +1,2 @@
-if piece_type>1 {
-	piece_type = 0;
-} else {
-	piece_type +=1;
-}
+// Up arrow - disabled (was debug feature that corrupted piece types)
+// Original: cycled piece_type 0→1→2, breaking the game

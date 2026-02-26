@@ -65,9 +65,12 @@ if (!is_moving) {
 
 // 3. Stepping Stone Activation & Extra-Move Valid Moves
 // ONLY process stepping stone logic if this is NOT an AI piece during AI turn
+// AI pieces handle stepping stones explicitly via AI_Manager, not this auto-detection
 if (!(piece_type == 1 && Game_Manager.turn == 1)) {
     if (!is_moving) {
-        if (stepping_chain == 0) {
+        // Only PLAYER pieces (piece_type == 0) should auto-detect stepping stones
+        // AI pieces use ai_execute_move_animated which sets up stepping stone state explicitly
+        if (stepping_chain == 0 && piece_type == 0) {
             var stone = instance_position(x, y, Stepping_Stone_Obj);
             if (stone != noone) {
                 // Use previous frame's position as reference.
@@ -85,7 +88,8 @@ if (!(piece_type == 1 && Game_Manager.turn == 1)) {
     }
 
     // While in extra–move Phase 1, override valid moves to the 8 adjacent directions.
-    if (!is_moving && stepping_chain == 2) {
+    // Only applies to player pieces - AI calculates its own valid moves
+    if (!is_moving && stepping_chain == 2 && piece_type == 0) {
         valid_moves = [];
         for (var dx = -1; dx <= 1; dx++) {
             for (var dy = -1; dy <= 1; dy++) {
@@ -97,7 +101,8 @@ if (!(piece_type == 1 && Game_Manager.turn == 1)) {
     }
 
     // Force the piece to remain selected if in any extra–move chain.
-    if (stepping_chain > 0) {
+    // Only player pieces should auto-select - AI pieces are controlled by AI_Manager
+    if (stepping_chain > 0 && piece_type == 0) {
         Game_Manager.selected_piece = self;
     }
 }

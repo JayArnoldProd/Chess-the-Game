@@ -3,6 +3,15 @@
 // Inherit the parent event
 event_inherited();
 
+// --- CHECK INDICATOR ---
+// Draw a red tint when this king is in check
+var am_in_check = ai_is_king_in_check_simple(piece_type);
+if (am_in_check) {
+    // Draw a pulsing red overlay on the king to indicate check
+    var pulse = 0.5 + 0.3 * sin(current_time / 200); // Pulse effect
+    draw_sprite_ext(sprite_index, image_index, x, y, 1, 1, 0, c_red, pulse);
+}
+
 // --- Castle Moves Overlay ---
 
 // Only draw castling overlays if this king is selected and castle moves exist.

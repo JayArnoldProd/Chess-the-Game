@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_get_legal_moves_safe",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_get_legal_moves_safe",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

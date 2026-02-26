@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_zobrist",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_zobrist",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

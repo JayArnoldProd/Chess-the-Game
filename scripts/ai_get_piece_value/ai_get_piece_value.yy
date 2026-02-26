@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_get_piece_value",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_get_piece_value",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

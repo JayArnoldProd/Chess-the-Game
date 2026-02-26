@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_world_effects",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_world_effects",
+  "parent":{
+    "name":"scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

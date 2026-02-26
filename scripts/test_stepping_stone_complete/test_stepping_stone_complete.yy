@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"test_stepping_stone_complete",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"test_stepping_stone_complete",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

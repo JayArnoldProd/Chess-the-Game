@@ -1,98 +1,101 @@
-/// AI_Manager Draw_64 Event - MINIMAL VERSION
+/// AI_Manager Draw_64 Event - COMPACT HORIZONTAL DEBUG DISPLAY
 
-// Only draw debug if enabled
-if (!variable_global_exists("ai_debug_visible")) global.ai_debug_visible = true;
+// Only draw if debug is enabled
+if (!variable_global_exists("ai_debug_visible")) global.ai_debug_visible = false;
 if (!global.ai_debug_visible || !ai_enabled) exit;
 
-// Set up text properties  
+// Don't draw debug info if settings panel is open
+if (instance_exists(Game_Manager) && Game_Manager.settings_open) exit;
+
+// Update "Thinking..." animation timer
+if (ai_state == "searching") {
+    ai_thinking_timer++;
+    if (ai_thinking_timer >= 20) {
+        ai_thinking_timer = 0;
+        ai_thinking_dots = (ai_thinking_dots + 1) mod 4;
+    }
+}
+
 draw_set_font(-1);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 
-var debug_x = 10;
-var debug_y = 20;
-var line_height = 14;
-var current_line = 0;
+var line_h = 14;
+var col1_x = 8;    // Left column
+var col2_x = 330;  // Right column (beside col1, not below)
+var start_y = 6;
 
-// Debug Display Header
-draw_set_color(c_yellow);
-draw_text(debug_x, debug_y + (current_line * line_height), "=== AI DEBUG (MINIMAL) ===");
-current_line++;
+// --- LEFT COLUMN: State + Turn + Search ---
+var ly = start_y;
 
-// AI Status
-draw_set_color(c_white);
-draw_text(debug_x, debug_y + (current_line * line_height), "AI Enabled: " + (ai_enabled ? "YES" : "NO"));
-current_line++;
-
-// Current Turn
-var turn_color = Game_Manager.turn == 1 ? c_yellow : c_white;
-draw_set_color(turn_color);
-draw_text(debug_x, debug_y + (current_line * line_height), "Turn: " + (Game_Manager.turn == 1 ? "BLACK (AI)" : "WHITE (Player)"));
-current_line++;
-
-// Move delay countdown
-if (variable_instance_exists(id, "ai_move_delay")) {
-    draw_set_color(c_white);
-    draw_text(debug_x, debug_y + (current_line * line_height), "AI Delay: " + string(ai_move_delay));
-    current_line++;
+// State
+var state_color = c_white;
+switch (ai_state) {
+    case "idle": state_color = c_lime; break;
+    case "preparing": state_color = c_yellow; break;
+    case "searching": state_color = c_orange; break;
+    case "executing": state_color = c_aqua; break;
+    case "waiting_turn_switch": state_color = c_fuchsia; break;
 }
+draw_set_color(state_color);
+draw_text(col1_x, ly, "AI: " + string_upper(ai_state));
+ly += line_h;
 
-// Difficulty
-draw_set_color(c_white);
-draw_text(debug_x, debug_y + (current_line * line_height), "Max Moves Considered: " + string(max_moves_to_consider));
-current_line++;
+// Turn
+var turn_text = (Game_Manager.turn == 1) ? "BLACK (AI)" : "WHITE (You)";
+draw_set_color(Game_Manager.turn == 1 ? c_yellow : c_white);
+draw_text(col1_x, ly, "Turn: " + turn_text);
+ly += line_h;
 
-// Moving Pieces Count
-var moving_count = 0;
-with (Chess_Piece_Obj) { 
-    if (is_moving) moving_count++; 
-}
-var moving_color = moving_count > 0 ? c_yellow : c_white;
-draw_set_color(moving_color);
-draw_text(debug_x, debug_y + (current_line * line_height), "Moving Pieces: " + string(moving_count));
-current_line++;
-
-// Legal Moves Count (only if AI's turn)
-if (Game_Manager.turn == 1) {
-    try {
-        var legal_moves = ai_get_legal_moves_fast(1);
-        draw_set_color(c_white);
-        draw_text(debug_x, debug_y + (current_line * line_height), "Legal Moves: " + string(array_length(legal_moves)));
-        current_line++;
-    } catch(e) {
-        draw_set_color(c_red);
-        draw_text(debug_x, debug_y + (current_line * line_height), "Legal Moves: ERROR");
-        current_line++;
-    }
-}
-
-// Skip a line
-current_line++;
-
-// Controls Section
-draw_set_color(c_yellow);
-draw_text(debug_x, debug_y + (current_line * line_height), "=== CONTROLS ===");
-current_line++;
-
+// Difficulty + Time limit
 draw_set_color(c_ltgray);
-draw_text(debug_x, debug_y + (current_line * line_height), "F1 - Toggle Debug");
-current_line++;
-draw_text(debug_x, debug_y + (current_line * line_height), "Ctrl+1-5 - Difficulty");
-current_line++;
+var diff_names = ["", "Beginner", "Easy", "Medium", "Hard", "GM"];
+var diff_name = (global.ai_difficulty_level >= 1 && global.ai_difficulty_level <= 5) ? diff_names[global.ai_difficulty_level] : "?";
+draw_text(col1_x, ly, "Diff: " + diff_name + " | Limit: " + string(ai_time_limit) + "ms");
+ly += line_h;
 
-// Status messages
-current_line++;
-if (Game_Manager.turn == 1) {
-    draw_set_color(c_yellow);
-    draw_text(debug_x, debug_y + (current_line * line_height), "AI is thinking...");
-    current_line++;
-} else if (Game_Manager.turn == 0) {
-    draw_set_color(c_lime);
-    draw_text(debug_x, debug_y + (current_line * line_height), "Make your move!");
-    current_line++;
+// If searching: live progress
+if (ai_state == "searching") {
+    var elapsed_ms = (get_timer() - ai_search_start_time) / 1000;
+    draw_set_color(c_orange);
+    var dots = "";
+    for (var i = 0; i < ai_thinking_dots; i++) dots += ".";
+    draw_text(col1_x, ly, "Thinking" + dots + " D" + string(ai_search_current_depth) + " M" + string(ai_search_index + 1) + "/" + string(array_length(ai_search_moves)));
+    ly += line_h;
+    
+    draw_set_color(c_white);
+    draw_text(col1_x, ly, string(floor(elapsed_ms)) + "ms | " + string(global.ai_search_nodes) + " nodes");
+    ly += line_h;
 }
 
-// Reset drawing properties
+// --- RIGHT COLUMN: Last search + delay ---
+var ry = start_y;
+
+if (ai_last_search_time > 0 && ai_state != "searching") {
+    draw_set_color(c_silver);
+    draw_text(col2_x, ry, "Last: D" + string(ai_last_search_depth) + " S" + string(ai_last_search_score));
+    ry += line_h;
+    draw_text(col2_x, ry, string(ai_last_search_nodes) + "n " + string(ai_last_search_time) + "ms");
+    ry += line_h;
+}
+
+// Move delay
+if (variable_instance_exists(id, "ai_move_delay") && ai_move_delay > 0 && ai_state == "idle") {
+    draw_set_color(c_ltgray);
+    draw_text(col2_x, ry, "Delay: " + string(ai_move_delay));
+    ry += line_h;
+}
+
+// Animating pieces
+var moving_count = 0;
+with (Chess_Piece_Obj) { if (is_moving) moving_count++; }
+if (moving_count > 0) {
+    draw_set_color(c_yellow);
+    draw_text(col2_x, ry, "Anim: " + string(moving_count) + " pcs");
+    ry += line_h;
+}
+
+// Reset
 draw_set_color(c_white);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);

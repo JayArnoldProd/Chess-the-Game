@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_manual_stepping_stone_advance",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_manual_stepping_stone_advance",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

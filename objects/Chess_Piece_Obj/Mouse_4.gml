@@ -1,11 +1,33 @@
 // Chess_Piece_Obj Left Pressed
 
+// Block all input during game over
+if (instance_exists(Game_Manager) && Game_Manager.game_over) {
+    exit;
+}
+
+// Block input when settings menu is open
+if (instance_exists(Game_Manager) && Game_Manager.settings_open) {
+    exit;
+}
+
+// Block all piece selection during AI stepping stone sequence
+if (instance_exists(AI_Manager) && 
+    variable_instance_exists(AI_Manager, "ai_stepping_phase") && 
+    AI_Manager.ai_stepping_phase > 0) {
+    exit; // AI is handling stepping stone - no player interaction allowed
+}
+
 // Only allow selection if its the players turn
 if (piece_type == 0 && Game_Manager.turn != 0) {
     exit; // It's not white's turn.
 }
 if (piece_type == 1 && Game_Manager.turn != 1) {
     exit; // It's not black's turn.
+}
+
+// Never allow player to select AI pieces directly
+if (piece_type == 1 && Game_Manager.turn == 1) {
+    exit; // AI pieces are controlled by AI_Manager, not player clicks
 }
 
 // If no piece is selected yet, record the original turn position and has_moved flag.

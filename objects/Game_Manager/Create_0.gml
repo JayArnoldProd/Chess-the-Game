@@ -1,6 +1,27 @@
 //Game_Manager Create
 moveCancelled = false;
 
+// Game over state
+game_over = false;
+game_over_message = "";
+game_over_timer = 0;
+game_over_delay = 180; // 3 seconds at 60fps
+
+// ========== SETTINGS ==========
+settings_open = false;
+global.ai_difficulty_level = 3; // Track current difficulty level
+
+// Settings icon position (updated in Draw_64)
+settings_icon_x = 0;
+settings_icon_y = 0;
+settings_icon_size = 32;
+
+// Settings panel bounds (updated in Draw_64)
+settings_panel_x = 0;
+settings_panel_y = 0;
+settings_panel_w = 280;
+settings_panel_h = 260;
+
 white_color = make_color_hsv(0,0,255);
 black_color = make_color_hsv(0,0,40);
 

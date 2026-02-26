@@ -1,5 +1,11 @@
 // In Game_Manager KeyPress event for Escape key:
 
+// Close settings menu if open
+if (settings_open) {
+    settings_open = false;
+    exit;
+}
+
 if (Game_Manager.selected_piece != noone) {
     var piece = Game_Manager.selected_piece;
     if (piece.stepping_chain > 0) {

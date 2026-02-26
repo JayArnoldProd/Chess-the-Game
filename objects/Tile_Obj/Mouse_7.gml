@@ -1,6 +1,27 @@
 // -----------------------------
 // Tile_Obj Left Released Event
 // -----------------------------
+
+// Block all input during game over
+if (instance_exists(Game_Manager) && Game_Manager.game_over) {
+    valid_move = false;
+    exit;
+}
+
+// Block input when settings menu is open
+if (instance_exists(Game_Manager) && Game_Manager.settings_open) {
+    valid_move = false;
+    exit;
+}
+
+// Block tile clicks during AI stepping stone sequence
+if (instance_exists(AI_Manager) && 
+    variable_instance_exists(AI_Manager, "ai_stepping_phase") && 
+    AI_Manager.ai_stepping_phase > 0) {
+    valid_move = false;
+    exit; // AI is handling stepping stone - no player interaction
+}
+
 if (Game_Manager.moveCancelled) {
     Game_Manager.moveCancelled = false; // reset flag
     valid_move = false;
@@ -8,8 +29,33 @@ if (Game_Manager.moveCancelled) {
 }
 
 selected_piece = Game_Manager.selected_piece;
+
+// Turn check: ensure the selected piece belongs to the player whose turn it is
+// This prevents players from controlling opponent pieces (e.g., AI pieces during player turn)
+if (selected_piece != noone) {
+    if (selected_piece.piece_type == 0 && Game_Manager.turn != 0) {
+        valid_move = false;
+        exit; // Can't move white pieces when it's not white's turn
+    }
+    if (selected_piece.piece_type == 1 && Game_Manager.turn != 1) {
+        valid_move = false;
+        exit; // Can't move black pieces when it's not black's turn
+    }
+}
+
 if (valid_move and (selected_piece != noone)) {
     var piece = selected_piece;
+    
+    // --- CHECK ENFORCEMENT: Block moves that leave king in check ---
+    // Apply on normal moves AND stepping stone phase 2 (final move)
+    if (piece.piece_type == 0 && (piece.stepping_chain == 0 || piece.stepping_chain == 1)) {
+        // Player piece - verify this move doesn't leave king in check
+        if (move_leaves_king_in_check(piece, x, y)) {
+            show_debug_message("Move blocked: would leave king in check!");
+            valid_move = false;
+            exit;
+        }
+    }
     
     // ==============================
     // STEPPING STONE MOVE PROCESSING

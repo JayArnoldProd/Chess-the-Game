@@ -55,13 +55,24 @@ if (Game_Manager.selected_piece == self && !is_moving) {
             }
             else { // Normal move drawing.
                 var occ = instance_place(check_x, check_y, Chess_Piece_Obj);
+                
+                // CHECK ENFORCEMENT: For player pieces, check if this move would leave king in check
+                var move_is_legal = true;
+                if (piece_type == 0) { // Player piece
+                    move_is_legal = !move_leaves_king_in_check(self, check_x, check_y);
+                }
+                
                 if (occ == noone) {
-                    // Empty square: draw green overlay.
-                    draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_green, 0.5);
-                    var tileInst = instance_place(check_x, check_y, Tile_Obj);
-                    if (tileInst != noone) {
-                        tileInst.valid_move = true;
+                    // Empty square
+                    if (move_is_legal) {
+                        // Legal move: draw green overlay
+                        draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_green, 0.5);
+                        var tileInst = instance_place(check_x, check_y, Tile_Obj);
+                        if (tileInst != noone) {
+                            tileInst.valid_move = true;
+                        }
                     }
+                    // If illegal (would leave king in check), don't draw anything - square not available
                 }
                 else {
                     // There is a piece present.
@@ -71,12 +82,15 @@ if (Game_Manager.selected_piece == self && !is_moving) {
                         draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_red, 0.5);
                     }
                     else {
-                        // Opponent piece: capture allowed.
-                        draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_green, 0.5);
-                        var tileInst = instance_place(check_x, check_y, Tile_Obj);
-                        if (tileInst != noone) {
-                            tileInst.valid_move = true;
+                        // Opponent piece: capture allowed if legal
+                        if (move_is_legal) {
+                            draw_sprite_ext(sprite_index, 0, check_x, check_y, 1, 1, 0, c_green, 0.5);
+                            var tileInst = instance_place(check_x, check_y, Tile_Obj);
+                            if (tileInst != noone) {
+                                tileInst.valid_move = true;
+                            }
                         }
+                        // If illegal capture, don't mark as valid
                     }
                 }
             }

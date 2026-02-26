@@ -1,0 +1,1 @@
+ai_manual_stepping_stone_advance();

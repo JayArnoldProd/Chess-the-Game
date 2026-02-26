@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ai_generate_moves_from_board",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ai_generate_moves_from_board",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
