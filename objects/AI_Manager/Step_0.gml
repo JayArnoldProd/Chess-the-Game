@@ -175,6 +175,9 @@ switch (ai_state) {
         ai_search_index = 0;
         ai_search_best_move = ai_search_moves[0];
         ai_search_best_score = -999999;
+        ai_completed_best_move = undefined;
+        ai_completed_best_score = -999999;
+        ai_completed_depth = 0;
         ai_search_current_depth = 1;
         ai_search_nodes_total = 0;
         ai_search_start_time = get_timer(); // Microseconds
@@ -227,8 +230,14 @@ switch (ai_state) {
             
             // Are we done with current depth?
             if (ai_search_index >= array_length(ai_search_moves)) {
-                // Completed this depth
+                // Completed this depth — SAVE results before starting next depth
                 global.ai_search_depth_completed = ai_search_current_depth;
+                
+                // Save completed depth results (used if next depth is interrupted)
+                ai_completed_best_move = ai_search_best_move;
+                ai_completed_best_score = ai_search_best_score;
+                ai_completed_depth = ai_search_current_depth;
+                
                 show_debug_message("AI: Depth " + string(ai_search_current_depth) + " complete, best score: " + string(ai_search_best_score) + ", nodes: " + string(global.ai_search_nodes));
                 
                 // Check for mate score (can stop early)
@@ -258,9 +267,9 @@ switch (ai_state) {
                     ai_search_moves = new_order;
                 }
                 
-                // Reset for new depth
+                // Reset for new depth — but completed results are safely saved
                 ai_search_index = 0;
-                ai_search_best_score = -999999; // Reset for new depth iteration
+                ai_search_best_score = -999999;
                 continue;
             }
             
@@ -403,6 +412,24 @@ switch (ai_state) {
 /// @description Finalizes search and transitions to executing state
 function ai_finalize_search() {
     var total_time = (get_timer() - ai_search_start_time) / 1000;
+    
+    // If we were interrupted mid-depth, use the LAST FULLY COMPLETED depth's results.
+    // Partial depth results are unreliable — the AI may have only searched a few moves
+    // and picked a terrible one (like a queen sacrifice) that deeper search would reject.
+    if (variable_instance_exists(id, "ai_completed_best_move") && ai_completed_best_move != undefined) {
+        // Did we finish the current depth? Check if index reached the end
+        var current_depth_complete = (ai_search_index >= array_length(ai_search_moves));
+        
+        if (!current_depth_complete) {
+            // Current depth is INCOMPLETE — always use last completed depth
+            show_debug_message("AI: Depth " + string(ai_search_current_depth) + " incomplete (" 
+                + string(ai_search_index) + "/" + string(array_length(ai_search_moves)) 
+                + " moves searched). Using completed depth " + string(ai_completed_depth) 
+                + " result (score " + string(ai_completed_best_score) + ")");
+            ai_search_best_move = ai_completed_best_move;
+            ai_search_best_score = ai_completed_best_score;
+        }
+    }
     
     ai_last_search_time = floor(total_time);
     ai_last_search_depth = global.ai_search_depth_completed;

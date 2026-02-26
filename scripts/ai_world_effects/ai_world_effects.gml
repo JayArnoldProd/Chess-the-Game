@@ -35,7 +35,7 @@ function ai_get_world_mechanics(_world) {
         case "pirate_seas":
             return ["water", "bridges"];
         case "fear_factory":
-            return ["conveyors"];
+            return ["conveyors", "void_tiles"];
         case "twisted_carnival":
             return ["random_spawns"];
         case "volcanic_wasteland":
@@ -119,22 +119,36 @@ function ai_build_virtual_world() {
         }
     }
     
+    // Factory Droppers (trash cans) - mark as void in tile map
+    with (Factory_Dropper_Obj) {
+        var bx = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
+        var by = round((y - Object_Manager.topleft_y) / Board_Manager.tile_size);
+        if (bx >= 0 && bx < 8 && by >= 0 && by < 8) {
+            _tiles[by][bx] = -1; // Treat droppers as void tiles
+            // Factory_Dropper marked as void in tile map
+        }
+    }
+    
     // Conveyors - store belt info
     with (Factory_Belt_Obj) {
         var bx = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
         var by = round((y - Object_Manager.topleft_y) / Board_Manager.tile_size);
-        // Note: right_direction=true means pieces move RIGHT (+x)
+        // Note: right_direction=true means pieces move RIGHT (+x)  
         // direction: 1 = pieces move right, -1 = pieces move left
+        
+        // Get actual belt length from total_tiles (don't hardcode!)
+        var _actual_length = variable_instance_exists(id, "total_tiles") ? total_tiles : 6;
+        
         var _belt_info = {
             start_col: bx,
             row: by,
-            length: 6,  // Standard belt length
+            length: _actual_length,
             direction: variable_instance_exists(id, "right_direction") ? (right_direction ? 1 : -1) : 1
         };
         array_push(_objects.conveyors, _belt_info);
     }
     
-    return {
+    var _result = {
         world: _world,
         mechanics: ai_get_world_mechanics(_world),
         board: _board,
@@ -142,6 +156,10 @@ function ai_build_virtual_world() {
         objects: _objects,
         turn_count: 0  // For turn-based effects
     };
+    
+    // Diagnostics stripped for performance (were used to debug dropper/void detection)
+    
+    return _result;
 }
 
 //=============================================================================
@@ -181,9 +199,10 @@ function ai_apply_world_effects(_world_state) {
 }
 
 /// @function ai_apply_conveyor_effect(world_state)
-/// @description Shifts pieces on conveyor belts
+/// @description Shifts pieces on conveyor belts (checks tile hazards at destination)
 function ai_apply_conveyor_effect(_world_state) {
     var _board = _world_state.board;
+    var _tiles = _world_state.tiles;
     var _conveyors = _world_state.objects.conveyors;
     
     for (var c = 0; c < array_length(_conveyors); c++) {
@@ -203,15 +222,15 @@ function ai_apply_conveyor_effect(_world_state) {
                 var _piece = _board[_row][col];
                 if (_piece != noone) {
                     var _new_col = col + 1;
-                    if (_new_col < 8 && _new_col < _start + _len) {
-                        // Move piece right
-                        _board[_row][_new_col] = _piece;
-                        _board[_row][col] = noone;
-                    } else if (_new_col >= _start + _len) {
-                        // Piece falls off belt - check for water/void
-                        _board[_row][col] = noone;
-                        // Piece is destroyed if pushed off into hazard
+                    _board[_row][col] = noone;
+                    if (_new_col >= 0 && _new_col < 8) {
+                        var _dest_tile = _tiles[_row][_new_col];
+                        if (_dest_tile != -1) {
+                            _board[_row][_new_col] = _piece;
+                        }
+                        // else: void/trash — piece destroyed
                     }
+                    // else: off board — piece destroyed
                 }
             }
         } else {
@@ -221,12 +240,15 @@ function ai_apply_conveyor_effect(_world_state) {
                 var _piece = _board[_row][col];
                 if (_piece != noone) {
                     var _new_col = col - 1;
-                    if (_new_col >= 0 && _new_col >= _start) {
-                        _board[_row][_new_col] = _piece;
-                        _board[_row][col] = noone;
-                    } else if (_new_col < _start) {
-                        _board[_row][col] = noone;
+                    _board[_row][col] = noone;
+                    if (_new_col >= 0 && _new_col < 8) {
+                        var _dest_tile = _tiles[_row][_new_col];
+                        if (_dest_tile != -1) {
+                            _board[_row][_new_col] = _piece;
+                        }
+                        // else: void/trash — piece destroyed
                     }
+                    // else: off board — piece destroyed
                 }
             }
         }
@@ -294,10 +316,7 @@ function ai_is_tile_safe(_world_state, _col, _row, _color) {
     var _tile_type = _world_state.tiles[_row][_col];
     
     // Void tiles are never safe
-    if (_tile_type == -1) {
-        show_debug_message("ai_is_tile_safe: VOID tile at (" + string(_col) + "," + string(_row) + ") - UNSAFE");
-        return false;
-    }
+    if (_tile_type == -1) return false;
     
     // Water tiles need bridges
     if (_tile_type == 1) {
@@ -307,7 +326,6 @@ function ai_is_tile_safe(_world_state, _col, _row, _color) {
                 return true; // Has bridge
             }
         }
-        show_debug_message("ai_is_tile_safe: WATER tile at (" + string(_col) + "," + string(_row) + ") without bridge - UNSAFE");
         return false; // No bridge = drowning
     }
     
@@ -743,7 +761,7 @@ function ai_apply_board_world_effects(_board, _world_state) {
     for (var i = 0; i < array_length(_mechanics); i++) {
         switch (_mechanics[i]) {
             case "conveyors":
-                ai_apply_conveyor_to_board(_board, _world_state.objects.conveyors);
+                ai_apply_conveyor_to_board(_board, _world_state.objects.conveyors, _world_state.tiles);
                 break;
             case "water":
                 ai_apply_water_to_board(_board, _world_state.tiles, _world_state.objects.bridges);
@@ -755,8 +773,9 @@ function ai_apply_board_world_effects(_board, _world_state) {
     }
 }
 
-/// @function ai_apply_conveyor_to_board(board, conveyors)
-function ai_apply_conveyor_to_board(_board, _conveyors) {
+/// @function ai_apply_conveyor_to_board(board, conveyors, tiles)
+/// @description Shifts pieces on conveyor belts. Pieces pushed off belt or onto hazards are destroyed.
+function ai_apply_conveyor_to_board(_board, _conveyors, _tiles) {
     for (var c = 0; c < array_length(_conveyors); c++) {
         var _belt = _conveyors[c];
         var _row = _belt.row;
@@ -767,33 +786,42 @@ function ai_apply_conveyor_to_board(_board, _conveyors) {
         if (_row < 0 || _row >= 8) continue;
         
         if (_dir > 0) {
-            // Moving right
+            // Moving right — process from right to left to avoid overwriting
             for (var col = _start + _len - 1; col >= _start; col--) {
                 if (col < 0 || col >= 8) continue;
                 var _piece = _board[_row][col];
                 if (_piece != noone) {
                     var _new_col = col + 1;
-                    if (_new_col < 8 && _new_col < _start + _len) {
-                        _board[_row][_new_col] = _piece;
-                        _board[_row][col] = noone;
-                    } else {
-                        _board[_row][col] = noone; // Falls off
+                    _board[_row][col] = noone; // Remove from current position
+                    if (_new_col >= 0 && _new_col < 8) {
+                        // Check if destination is a hazard
+                        var _dest_tile = (_tiles != undefined && _row >= 0 && _row < 8) ? _tiles[_row][_new_col] : 0;
+                        if (_dest_tile == -1) {
+                            // Void/trash — piece destroyed
+                        } else {
+                            _board[_row][_new_col] = _piece; // Piece survives
+                        }
                     }
+                    // else: pushed off board — piece destroyed
                 }
             }
         } else {
-            // Moving left
+            // Moving left — process from left to right
             for (var col = _start; col < _start + _len; col++) {
                 if (col < 0 || col >= 8) continue;
                 var _piece = _board[_row][col];
                 if (_piece != noone) {
                     var _new_col = col - 1;
-                    if (_new_col >= 0 && _new_col >= _start) {
-                        _board[_row][_new_col] = _piece;
-                        _board[_row][col] = noone;
-                    } else {
-                        _board[_row][col] = noone; // Falls off
+                    _board[_row][col] = noone; // Remove from current position
+                    if (_new_col >= 0 && _new_col < 8) {
+                        var _dest_tile = (_tiles != undefined && _row >= 0 && _row < 8) ? _tiles[_row][_new_col] : 0;
+                        if (_dest_tile == -1) {
+                            // Void/trash — piece destroyed
+                        } else {
+                            _board[_row][_new_col] = _piece;
+                        }
                     }
+                    // else: pushed off board — piece destroyed
                 }
             }
         }

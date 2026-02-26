@@ -156,11 +156,13 @@ function ai_search_iterative(time_limit_ms = 2000) {
 }
 
 /// @function ai_search_should_stop()
-/// @description Checks if search should stop due to time
+/// @description Checks if search should stop due to time (every 512 nodes for performance)
 function ai_search_should_stop() {
     if (global.ai_search_stop) return true;
     
-    // Check EVERY node for maximum responsiveness (100ms cap makes overhead negligible)
+    // Only check timer every 512 nodes to reduce get_timer() overhead
+    if ((global.ai_search_nodes & 511) != 0) return false;
+    
     var elapsed = (get_timer() / 1000) - global.ai_search_start_time;
     if (elapsed >= global.ai_search_time_limit) {
         global.ai_search_stop = true;

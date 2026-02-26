@@ -17,7 +17,7 @@ ai_search_best_score = -999999;
 ai_search_current_depth = 1;    // Current iterative deepening depth
 ai_search_max_depth = 20;       // Maximum depth
 ai_search_start_time = 0;       // When search began (get_timer())
-ai_search_frame_budget = 14;    // ms per frame (14ms = safe for 60fps with overhead)
+ai_search_frame_budget = 10;    // ms per frame (10ms leaves 6.6ms for game loop at 60fps)
 ai_search_nodes_total = 0;      // Total nodes searched
 ai_search_depth_scores = [];    // Best score at each depth for reordering
 
