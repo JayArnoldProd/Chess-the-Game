@@ -57,9 +57,17 @@ if (Game_Manager.selected_piece == self && !is_moving) {
                 var occ = instance_place(check_x, check_y, Chess_Piece_Obj);
                 
                 // CHECK ENFORCEMENT: For player pieces, check if this move would leave king in check
+                // EXCEPTION: Stepping stone tiles allow the king to land on threatened squares
+                // because the stepping stone grants extra moves to escape to safety.
+                // The final move (phase 2) still enforces check in Tile_Obj/Mouse_7.gml.
                 var move_is_legal = true;
                 if (piece_type == 0) { // Player piece
-                    move_is_legal = !move_leaves_king_in_check(self, check_x, check_y);
+                    var target_has_stepping_stone = instance_position(check_x, check_y, Stepping_Stone_Obj) != noone;
+                    if (target_has_stepping_stone) {
+                        move_is_legal = true; // Stepping stones grant extra moves to escape
+                    } else {
+                        move_is_legal = !move_leaves_king_in_check(self, check_x, check_y);
+                    }
                 }
                 
                 if (occ == noone) {

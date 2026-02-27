@@ -23,6 +23,7 @@ function ai_end_stepping_stone_sequence() {
         piece.stepping_chain = 0;
         piece.extra_move_pending = false;
         piece.stepping_stone_instance = noone;
+        piece.stepping_stone_used = true;
         piece.pending_turn_switch = undefined;
         piece.pending_normal_move = false;
         

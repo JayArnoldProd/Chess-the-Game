@@ -23,6 +23,8 @@ stepping_stone_instance = noone;  // Will store the activated stepping stone’s
 stone_original_x = 0;         // Save original position so we can revert later
 stone_original_y = 0;
 
+stepping_stone_used = false;  // True after completing a stepping stone sequence this turn
+
 pre_stepping_x = x;
 pre_stepping_y = y;
 

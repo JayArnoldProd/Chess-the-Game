@@ -2,6 +2,13 @@
 // Chess_Piece_Obj Step Event
 // -----------------------------
 
+// 0. Reset stepping stone used flag when it's our turn again (not mid-turn-switch)
+if ((piece_type == 0 && Game_Manager.turn == 0) || (piece_type == 1 && Game_Manager.turn == 1)) {
+    if (stepping_chain == 0 && !is_moving && pending_turn_switch == undefined) {
+        stepping_stone_used = false;
+    }
+}
+
 // 1. Update audio emitter and record last position.
 audio_emitter_position(audio_emitter, x, y, 0);
 last_x = x;
@@ -70,7 +77,7 @@ if (!(piece_type == 1 && Game_Manager.turn == 1)) {
     if (!is_moving) {
         // Only PLAYER pieces (piece_type == 0) should auto-detect stepping stones
         // AI pieces use ai_execute_move_animated which sets up stepping stone state explicitly
-        if (stepping_chain == 0 && piece_type == 0) {
+        if (stepping_chain == 0 && piece_type == 0 && !stepping_stone_used) {
             var stone = instance_position(x, y, Stepping_Stone_Obj);
             if (stone != noone) {
                 // Use previous frame's position as reference.

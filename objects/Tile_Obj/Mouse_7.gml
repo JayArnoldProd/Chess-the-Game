@@ -48,12 +48,24 @@ if (valid_move and (selected_piece != noone)) {
     
     // --- CHECK ENFORCEMENT: Block moves that leave king in check ---
     // Apply on normal moves AND stepping stone phase 2 (final move)
+    // EXCEPTION: King moving TO a stepping stone tile is allowed even if attacked,
+    // because the stepping stone grants extra moves to escape. Phase 2 still enforces check.
     if (piece.piece_type == 0 && (piece.stepping_chain == 0 || piece.stepping_chain == 1)) {
-        // Player piece - verify this move doesn't leave king in check
-        if (move_leaves_king_in_check(piece, x, y)) {
-            show_debug_message("Move blocked: would leave king in check!");
-            valid_move = false;
-            exit;
+        var skip_check = false;
+        if (piece.stepping_chain == 0) {
+            // Initial move — if landing on a stepping stone, allow it
+            // Stepping stones grant extra moves, so the piece can escape to safety
+            if (instance_position(x, y, Stepping_Stone_Obj) != noone) {
+                skip_check = true;
+            }
+        }
+        if (!skip_check) {
+            // Player piece - verify this move doesn't leave king in check
+            if (move_leaves_king_in_check(piece, x, y)) {
+                show_debug_message("Move blocked: would leave king in check!");
+                valid_move = false;
+                exit;
+            }
         }
     }
     
@@ -112,6 +124,7 @@ if (valid_move and (selected_piece != noone)) {
             piece.stepping_chain = 0;
             piece.extra_move_pending = false;
             piece.stepping_stone_instance = noone;
+            piece.stepping_stone_used = true;  // Prevent re-activation if landing on another stone
             show_debug_message("Stepping stone phase 2 complete; turn ends.");
             
             // Capture check for extra move (using your original loop):
@@ -198,14 +211,16 @@ if (valid_move and (selected_piece != noone)) {
     // NORMAL MOVE PROCESSING
     // ==============================
     else {
-        // Determine landing sound.
-        if (!instance_position(x + Board_Manager.tile_size/4, y + Board_Manager.tile_size/4, Stepping_Stone_Obj)) {
+        // Determine landing sound and whether stepping stone activates.
+        var landing_stone = instance_position(x, y, Stepping_Stone_Obj);
+        if (landing_stone == noone) {
             piece.landing_sound= Piece_Landing_SFX;
 			piece.landing_sound_pending = true;
             piece.pending_turn_switch = (piece.piece_type == 0) ? 1 : 0;
         } else {
 			piece.landing_sound= Piece_StoneLanding_SFX;
 			piece.landing_sound_pending = true;
+            // Don't set pending_turn_switch — stepping stone will activate in Step_0
         }
     
         // Normal capture check.
