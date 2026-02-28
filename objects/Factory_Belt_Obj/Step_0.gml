@@ -5,30 +5,31 @@ var tile_size   = Board_Manager.tile_size;      // e.g., 24 pixels per tile
 var total_tiles = 6;                             // belt spans 6 tiles
 var belt_width  = total_tiles * tile_size;        // e.g., 144 pixels
 
-// --- Start a new animation cycle when the turn changes.
+// Animate belt after player turn (0→2) and after AI turn (1→0), NOT after enemy turn (2→1)
 if (Game_Manager.turn != last_turn && !animating) {
-    old_position = position;
-    if (!right_direction) {
-        // Belt moves one tile to the right.
-        target_position = (position + 1) mod total_tiles;
-    } else {
-        // Belt moves one tile to the left.
-        target_position = (position - 1 + total_tiles) mod total_tiles;
+    if (last_turn == 0 || last_turn == 1) {
+        old_position = position;
+        if (!right_direction) {
+            target_position = (position + 1) mod total_tiles;
+        } else {
+            target_position = (position - 1 + total_tiles) mod total_tiles;
+        }
+        belt_anim_progress = 0;
+        animating = true;
+        
+        var rnd = irandom_range(1, 3);
+        var conveyer_sound;
+        if (rnd == 1) {
+            conveyer_sound = Conveyer_SFX_1;
+        } else if (rnd == 2) {
+            conveyer_sound = Conveyer_SFX_2;
+        } else {
+            conveyer_sound = Conveyer_SFX_3;
+        }
+        audio_play_sound_on(audio_emitter, conveyer_sound, 0, false);
     }
-    belt_anim_progress = 0;
-    animating = true;
-    
-    // Randomly choose one of the three conveyor sounds.
-    var rnd = irandom_range(1, 3);
-    var conveyer_sound;
-    if (rnd == 1) {
-        conveyer_sound = Conveyer_SFX_1;
-    } else if (rnd == 2) {
-        conveyer_sound = Conveyer_SFX_2;
-    } else {
-        conveyer_sound = Conveyer_SFX_3;
-    }
-    audio_play_sound_on(audio_emitter, conveyer_sound, 0, false);
+    // Always update last_turn so we track transitions correctly
+    last_turn = Game_Manager.turn;
 }
 
 // --- Update animation progress.
@@ -66,6 +67,18 @@ with (Chess_Piece_Obj) {
     }
 }
 
+// --- Move any Enemy_Obj that is on (or near) the belt.
+with (Enemy_Obj) {
+    if (!is_dead && !is_moving) {
+        var cx = x + Board_Manager.tile_size * 0.5;
+        var cy = y + Board_Manager.tile_size * 0.5;
+        if (cx >= (belt_left - tile_size) && cx <= (belt_right + tile_size) &&
+            cy >= belt_top && cy <= belt_bottom) {
+            x -= piece_delta;
+        }
+    }
+}
+
 // --- Final Snap: When the belt animation finishes, force pieces on the belt to be exactly on grid.
 // This prevents any cumulative floating-point drift.
 if (!animating) {
@@ -77,6 +90,24 @@ if (!animating) {
             var offset = x - belt_left;
             offset = round(offset / tile_size) * tile_size;
             x = belt_left + offset;
+        }
+    }
+    // Snap enemies too
+    with (Enemy_Obj) {
+        if (!is_dead) {
+            var cx = x + Board_Manager.tile_size * 0.5;
+            var cy = y + Board_Manager.tile_size * 0.5;
+            if (cx >= (belt_left - tile_size) && cx <= (belt_right + tile_size) &&
+                cy >= belt_top && cy <= belt_bottom) {
+                var offset = x - belt_left;
+                offset = round(offset / tile_size) * tile_size;
+                x = belt_left + offset;
+                // Update grid position after belt move
+                if (instance_exists(Object_Manager) && instance_exists(Board_Manager)) {
+                    grid_col = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
+                    grid_row = round((y - Object_Manager.topleft_y) / Board_Manager.tile_size);
+                }
+            }
         }
     }
 }

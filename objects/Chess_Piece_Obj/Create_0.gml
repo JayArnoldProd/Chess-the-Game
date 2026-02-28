@@ -51,6 +51,16 @@ pending_turn_switch = undefined;
 pending_en_passant = false;
 pending_normal_move = false;
 
+// Enemy attack bounce-back
+bounce_back_pending = false;
+bounce_back_x = 0;
+bounce_back_y = 0;
+
+// Deferred enemy damage — applied when piece arrives at target (not immediately)
+pending_enemy_damage = noone;       // Enemy_Obj instance to damage
+pending_enemy_damage_col = 0;       // Attacker's grid col (for knockback direction)
+pending_enemy_damage_row = 0;       // Attacker's grid row
+
 destroy_pending = false;
 destroy_target_x = 0;
 destroy_target_y = 0;

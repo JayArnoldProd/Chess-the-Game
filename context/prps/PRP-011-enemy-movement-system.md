@@ -296,6 +296,13 @@ function enemy_is_move_valid(_enemy, _col, _row) {
         return false;
     }
     
+    // === STEPPING STONE CHECK ===
+    // Stepping stones are walls to enemies — enemies cannot occupy them (2026-02-27 ruling)
+    var _stone = instance_position(_x, _y, Stepping_Stone_Obj);
+    if (_stone != noone) {
+        return false;
+    }
+    
     // === HAZARD CHECK ===
     var _tile = instance_position(_x, _y, Tile_Obj);
     if (_tile != noone && variable_instance_exists(_tile, "tile_type")) {
@@ -477,6 +484,11 @@ Per design spec: "If an enemy tries to move onto another enemy's tile, it gets *
 
 This is already handled by `enemy_is_move_valid()` returning false for tiles with other enemies.
 
+### Enemy Tries to Move onto a Stepping Stone
+*(Added 2026-02-27, per Jas ruling)*
+
+Stepping stones are **walls** to enemies. `enemy_is_move_valid()` returns false for tiles with `Stepping_Stone_Obj`. Enemies cannot occupy or use stepping stone mechanics.
+
 ### Enemy Pushed Back by Multiple Blockages
 
 If ALL valid moves are blocked:
@@ -537,6 +549,14 @@ Valid moves array order affects tie-breaking. Currently first move with minimum 
 1. Position enemy near water
 2. Verify enemy doesn't walk into water
 3. Verify enemy uses bridges if available
+
+### Stepping Stone Blocking Test
+*(Added 2026-02-27)*
+
+1. Position enemy adjacent to a stepping stone tile
+2. Make the stepping stone the only path toward the closest player piece
+3. Verify enemy does NOT move onto the stepping stone (treated as wall)
+4. Verify enemy picks an alternate path or skips movement
 
 ---
 

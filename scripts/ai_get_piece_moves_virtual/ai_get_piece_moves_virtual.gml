@@ -76,7 +76,7 @@ function ai_get_pawn_moves_virtual(board, col, row, piece_type) {
         if (cap_col >= 0 && cap_col < 8 && cap_row >= 0 && cap_row < 8) {
             var target = board[cap_row][cap_col];
             var tile_safe = ai_is_tile_safe_for_move(_tiles, _bridges, cap_col, cap_row);
-            if (target != noone && target.piece_type != piece_type && tile_safe) {
+            if (target != noone && target.piece_id != "enemy" && target.piece_type != piece_type && tile_safe) {
                 array_push(moves, {from_col: col, from_row: row, to_col: cap_col, to_row: cap_row, is_capture: true, special: ""});
             }
         }
@@ -111,6 +111,8 @@ function ai_get_knight_moves_virtual(board, col, row, piece_type) {
             if (!tile_safe) continue;
             
             var target = board[new_row][new_col];
+            // Enemies (piece_type == -1) are impassable — can't capture via chess moves
+            if (target != noone && target.piece_id == "enemy") continue;
             if (target == noone || target.piece_type != piece_type) {
                 var is_capture = (target != noone);
                 array_push(moves, {from_col: col, from_row: row, to_col: new_col, to_row: new_row, is_capture: is_capture, special: ""});
@@ -206,6 +208,8 @@ function ai_get_sliding_moves_virtual(board, col, row, piece_type, directions) {
             
             if (target == noone) {
                 array_push(moves, {from_col: col, from_row: row, to_col: new_col, to_row: new_row, is_capture: false, special: ""});
+            } else if (target.piece_id == "enemy") {
+                break; // Enemies are impassable walls to chess pieces (can't capture via chess moves)
             } else if (target.piece_type != piece_type) {
                 array_push(moves, {from_col: col, from_row: row, to_col: new_col, to_row: new_row, is_capture: true, special: ""});
                 break; // Can't move past capture
@@ -245,6 +249,8 @@ function ai_get_king_moves_virtual(board, col, row, piece_type, has_moved) {
                 if (!tile_safe) continue;
                 
                 var target = board[new_row][new_col];
+                // Enemies (piece_type == -1) are impassable — can't capture via chess moves
+                if (target != noone && target.piece_id == "enemy") continue;
                 if (target == noone || target.piece_type != piece_type) {
                     var is_capture = (target != noone);
                     array_push(moves, {from_col: col, from_row: row, to_col: new_col, to_row: new_row, is_capture: is_capture, special: ""});

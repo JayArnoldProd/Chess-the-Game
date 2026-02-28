@@ -85,6 +85,23 @@ function ai_build_virtual_world() {
         }
     }
     
+    // Add enemies as blockers on the virtual board
+    with (Enemy_Obj) {
+        if (!instance_exists(id) || is_dead) continue;
+        if (grid_col >= 0 && grid_col < 8 && grid_row >= 0 && grid_row < 8) {
+            if (_board[grid_row][grid_col] == noone) {
+                _board[grid_row][grid_col] = {
+                    piece_id: "enemy",
+                    piece_type: -1,
+                    has_moved: true,
+                    health: current_hp,
+                    stepping_chain: 0,
+                    instance: id
+                };
+            }
+        }
+    }
+    
     // Populate tile types
     with (Tile_Obj) {
         var bx = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
@@ -395,6 +412,55 @@ function ai_evaluate_world_bonuses(_world_state, _color) {
         }
     }
     
+    // Universal: enemy awareness (applies to all worlds when enemies exist)
+    if (instance_exists(Enemy_Manager) && array_length(Enemy_Manager.enemy_list) > 0) {
+        _score += ai_eval_enemy_awareness_bonus(_color);
+    }
+    
+    return _score;
+}
+
+/// @function ai_eval_enemy_awareness_bonus(color)
+/// @description AI evaluates positions relative to Enemy_Obj instances on the board.
+///   Encourages attacking enemies, discourages leaving pieces adjacent to enemies.
+function ai_eval_enemy_awareness_bonus(_color) {
+    var _score = 0;
+    
+    for (var e = 0; e < array_length(Enemy_Manager.enemy_list); e++) {
+        var _enemy = Enemy_Manager.enemy_list[e];
+        if (!instance_exists(_enemy) || _enemy.is_dead) continue;
+        
+        var _ecol = _enemy.grid_col;
+        var _erow = _enemy.grid_row;
+        
+        // Check all pieces relative to this enemy
+        with (Chess_Piece_Obj) {
+            if (!instance_exists(id)) continue;
+            var _pcol = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
+            var _prow = round((y - Object_Manager.topleft_y) / Board_Manager.tile_size);
+            var _dist = abs(_pcol - _ecol) + abs(_prow - _erow);
+            
+            if (piece_type == _color) {
+                // OUR piece near an enemy
+                if (_dist == 1) {
+                    // Adjacent to enemy = can attack next turn, slight bonus
+                    _score += 15;
+                    // But penalize high-value pieces being adjacent (risk)
+                    if (piece_id == "queen") _score -= 30;
+                    if (piece_id == "rook") _score -= 15;
+                } else if (_dist == 2) {
+                    // In striking range = moderate positioning bonus
+                    _score += 5;
+                }
+            } else {
+                // OPPONENT piece near an enemy — enemies threaten them too
+                if (_dist <= 1) {
+                    _score += 10; // Enemy threatening opponent piece is good for AI
+                }
+            }
+        }
+    }
+    
     return _score;
 }
 
@@ -403,9 +469,10 @@ function ai_eval_stepping_stone_bonus(_world_state, _color) {
     var _score = 0;
     var _board = _world_state.board;
     var _stones = _world_state.objects.stepping_stones;
+    var _stone_count = array_length(_stones);
     
     // Bonus for pieces near stepping stones (mobility bonus)
-    for (var s = 0; s < array_length(_stones); s++) {
+    for (var s = 0; s < _stone_count; s++) {
         var _stone = _stones[s];
         // Check if our piece is on or adjacent to the stone
         for (var dy = -1; dy <= 1; dy++) {
@@ -415,11 +482,11 @@ function ai_eval_stepping_stone_bonus(_world_state, _color) {
                 if (_r >= 0 && _r < 8 && _c >= 0 && _c < 8) {
                     var _piece = _board[_r][_c];
                     if (_piece != noone) {
-                        var _sign = (_piece.piece_type == _color) ? 1 : -1;
+                        var _piece_sign = (_piece.piece_type == _color) ? 1 : -1;
                         if (dx == 0 && dy == 0) {
-                            _score += _sign * 50; // On stone = big bonus
+                            _score += _piece_sign * 50; // On stone = big bonus
                         } else {
-                            _score += _sign * 10; // Adjacent = small bonus
+                            _score += _piece_sign * 10; // Adjacent = small bonus
                         }
                     }
                 }
@@ -427,7 +494,189 @@ function ai_eval_stepping_stone_bonus(_world_state, _color) {
         }
     }
     
+    // --- Stepping Stone Threat Awareness ---
+    // Penalize if the AI king is in the extended threat zone of player pieces via stones
+    // _color is AI color (1 = black). Player pieces are color 0 (white, is_white=true).
+    
+    // Find AI king position
+    var _ai_king_row = -1;
+    var _ai_king_col = -1;
+    for (var _kr = 0; _kr < 8; _kr++) {
+        for (var _kc = 0; _kc < 8; _kc++) {
+            var _kp = _board[_kr][_kc];
+            if (_kp != noone && _kp.piece_id == "king" && _kp.piece_type == _color) {
+                _ai_king_row = _kr;
+                _ai_king_col = _kc;
+                _kr = 8; // break outer
+                break;
+            }
+        }
+    }
+    
+    if (_ai_king_row < 0) return _score; // No king found
+    
+    var _player_color = (_color == 1) ? 0 : 1;
+    
+    for (var s = 0; s < _stone_count; s++) {
+        var _stone = _stones[s];
+        var _sr = _stone.row;
+        var _sc = _stone.col;
+        
+        // Quick distance check: if AI king is far from stone, skip
+        // Max reach via stone: phase1 (1 tile) + phase2 (max 7 for sliding pieces, 2+1 for knight)
+        // Use Manhattan distance > 10 as a fast cull
+        var _king_dist_r = abs(_ai_king_row - _sr);
+        var _king_dist_c = abs(_ai_king_col - _sc);
+        if (_king_dist_r + _king_dist_c > 10) continue;
+        
+        // Find player pieces that can reach this stone in 1 normal move
+        // Check each player piece on the board
+        for (var _pr = 0; _pr < 8; _pr++) {
+            for (var _pc = 0; _pc < 8; _pc++) {
+                var _pp = _board[_pr][_pc];
+                if (_pp == noone || _pp.piece_type != _player_color) continue;
+                if (_pp.piece_id == "king") continue; // Kings don't use stones offensively
+                
+                // Can this piece reach the stone at (_sr, _sc)?
+                if (!ai_can_piece_reach(_pp.piece_id, _pp.piece_type, _pr, _pc, _sr, _sc, _board)) continue;
+                
+                // This player piece can reach the stone. Compute extended threat zone.
+                // Phase 1: from stone, 8 adjacent tiles
+                // Phase 2: from each phase 1 tile, piece's normal attack squares
+                // Check if AI king is in any phase 2 attack square
+                
+                var _threatens_king = false;
+                var _min_proximity = 999;
+                
+                for (var _p1dy = -1; _p1dy <= 1; _p1dy++) {
+                    for (var _p1dx = -1; _p1dx <= 1; _p1dx++) {
+                        var _p1r = _sr + _p1dy;
+                        var _p1c = _sc + _p1dx;
+                        if (_p1r < 0 || _p1r >= 8 || _p1c < 0 || _p1c >= 8) continue;
+                        
+                        // Phase 2: can this piece type attack the king from (_p1r, _p1c)?
+                        if (ai_can_piece_attack(_pp.piece_id, _pp.piece_type, _p1r, _p1c, _ai_king_row, _ai_king_col, _board)) {
+                            _threatens_king = true;
+                            break;
+                        }
+                        
+                        // Track proximity for lighter penalty
+                        var _dist = abs(_ai_king_row - _p1r) + abs(_ai_king_col - _p1c);
+                        if (_dist < _min_proximity) _min_proximity = _dist;
+                    }
+                    if (_threatens_king) break;
+                }
+                
+                if (_threatens_king) {
+                    // Heavy penalty: AI king is in the extended threat zone
+                    _score -= 200;
+                } else if (_min_proximity <= 2) {
+                    // Lighter proximity penalty: king is near a threatened zone
+                    _score -= (3 - _min_proximity) * 40; // 80 at dist 1, 40 at dist 2
+                }
+            }
+        }
+    }
+    
     return _score;
+}
+
+/// @function ai_can_piece_reach(piece_id, piece_type, from_row, from_col, to_row, to_col, board)
+/// @description Checks if a piece at (from) can reach (to) in one normal move
+function ai_can_piece_reach(_pid, _ptype, _fr, _fc, _tr, _tc, _brd) {
+    var _dr = _tr - _fr;
+    var _dc = _tc - _fc;
+    var _adr = abs(_dr);
+    var _adc = abs(_dc);
+    
+    if (_dr == 0 && _dc == 0) return false;
+    
+    switch (_pid) {
+        case "pawn":
+            // Pawns move forward but capture diagonally
+            // White (type 0) moves up (row decreases), Black (type 1) moves down
+            var _fwd = (_ptype == 0) ? -1 : 1;
+            // Can reach stone by normal move (forward 1) or capture (diagonal 1)
+            if (_dr == _fwd && _adc <= 1) return true;
+            // Double move from starting rank
+            if (_dc == 0 && _dr == _fwd * 2) {
+                var _start_rank = (_ptype == 0) ? 6 : 1;
+                if (_fr == _start_rank && _brd[_fr + _fwd][_fc] == noone) return true;
+            }
+            return false;
+            
+        case "knight":
+            return (_adr == 2 && _adc == 1) || (_adr == 1 && _adc == 2);
+            
+        case "bishop":
+            if (_adr != _adc) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        case "rook":
+            if (_dr != 0 && _dc != 0) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        case "queen":
+            if (_adr != _adc && _dr != 0 && _dc != 0) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        default:
+            return false;
+    }
+}
+
+/// @function ai_can_piece_attack(piece_id, piece_type, from_row, from_col, target_row, target_col, board)
+/// @description Checks if a piece type at (from) can attack (target) — used for phase 2 threat
+function ai_can_piece_attack(_pid, _ptype, _fr, _fc, _tr, _tc, _brd) {
+    var _dr = _tr - _fr;
+    var _dc = _tc - _fc;
+    var _adr = abs(_dr);
+    var _adc = abs(_dc);
+    
+    if (_dr == 0 && _dc == 0) return false;
+    
+    switch (_pid) {
+        case "pawn":
+            // Pawns attack diagonally
+            var _fwd = (_ptype == 0) ? -1 : 1;
+            return (_dr == _fwd && _adc == 1);
+            
+        case "knight":
+            return (_adr == 2 && _adc == 1) || (_adr == 1 && _adc == 2);
+            
+        case "bishop":
+            if (_adr != _adc) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        case "rook":
+            if (_dr != 0 && _dc != 0) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        case "queen":
+            if (_adr != _adc && _dr != 0 && _dc != 0) return false;
+            return ai_slide_clear(_fr, _fc, _tr, _tc, _brd);
+            
+        default:
+            return false;
+    }
+}
+
+/// @function ai_slide_clear(from_row, from_col, to_row, to_col, board)
+/// @description Checks if sliding path is unobstructed (excluding destination)
+function ai_slide_clear(_fr, _fc, _tr, _tc, _brd) {
+    var _dr = _tr - _fr;
+    var _dc = _tc - _fc;
+    var _step_r = (_dr != 0) ? ((_dr > 0) ? 1 : -1) : 0;
+    var _step_c = (_dc != 0) ? ((_dc > 0) ? 1 : -1) : 0;
+    
+    var _cr = _fr + _step_r;
+    var _cc = _fc + _step_c;
+    while (_cr != _tr || _cc != _tc) {
+        if (_brd[_cr][_cc] != noone) return false;
+        _cr += _step_r;
+        _cc += _step_c;
+    }
+    return true;
 }
 
 /// @function ai_eval_bridge_control_bonus(world_state, color)

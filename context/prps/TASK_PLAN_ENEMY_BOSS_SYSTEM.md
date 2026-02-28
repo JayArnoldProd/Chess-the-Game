@@ -261,6 +261,14 @@ Implement each boss with unique cheats.
 | `boss_cheat_lose_turn()` | The King skip-turn ability |
 | `boss_king_record_move()` | Track player moves for undo mechanic |
 
+### Collision Rules — Stepping Stone Interactions
+*(Added 2026-02-27, per Jas ruling)*
+
+- `Stepping_Stone_Obj` = **immovable wall** for enemies and knockback
+- Enemies cannot occupy stepping stone tiles (`enemy_is_move_valid` checks for `Stepping_Stone_Obj`)
+- Enemy knockback into stepping stone = cancelled (`enemy_is_knockback_valid` checks for `Stepping_Stone_Obj`)
+- Player piece on stepping stone that attacks a surviving enemy → piece pushed off stone in opposite direction of attack
+
 ### Data Structures
 
 **Enemy Definition (data-driven):**
@@ -348,6 +356,7 @@ Player (turn=0) → Boss AI Move (turn=1) → Boss Cheats (turn=3) → repeat
 | Boss cheat timing conflicts | Clear state machine with queued actions |
 | Multi-tile piece complexity | Defer to later if time-constrained |
 | Performance with many enemies | Cap at 5 enemies per level |
+| Stepping stone + knockback interaction complexity | Stepping stones are immovable walls for ALL collision; piece bounce-back off stones needs dedicated handling (2026-02-27 ruling) |
 
 ---
 

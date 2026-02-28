@@ -213,6 +213,13 @@ function enemy_is_knockback_valid(_enemy, _col, _row) {
         return false;
     }
     
+    // === STEPPING STONE CHECK ===
+    // Stepping stones are immovable walls for knockback purposes (2026-02-27 ruling)
+    var _stone = instance_position(_x, _y, Stepping_Stone_Obj);
+    if (_stone != noone) {
+        return false;
+    }
+    
     // === HAZARD CHECK ===
     // Don't knock into void - treat as wall (enemy stays put)
     // Note: Could alternatively knock into void and kill, but design says "stay put"
@@ -439,6 +446,33 @@ Bishop attacks from top-left:
 
 The knockback direction is determined by the sign of (enemy_pos - attacker_pos), giving smooth diagonal motion.
 
+### Stepping Stone Knockback Rules
+*(Added 2026-02-27, per Jas ruling)*
+
+Stepping stones (`Stepping_Stone_Obj`) are **immovable walls** for ALL collision/knockback purposes.
+
+**Rule 1: Enemy knockback into stepping stone = cancelled**
+```
+  R → E → [Stone]     Rook attacks enemy, enemy can't be knocked into stone
+         E stays put   (stepping stone = wall)
+```
+
+**Rule 2: Piece bounce-back is always a simple revert**
+When a piece attacks an immovable target (enemy survives, knockback blocked, etc.), the piece simply **reverts to its pre-attack position**. No secondary knockback calculations. This applies whether the piece is on a stepping stone or not.
+```
+  [Stone+R] → E       Rook on stone attacks enemy right, enemy survives
+  [Stone+R]   E       Rook reverts to its original tile (on the stone)
+```
+
+**Rule 3: Complex chain — same simple revert**
+```
+  [Stone+R]  E1 E2    Stone under rook, two enemies ahead
+  [Stone+R]  E1 E2    Rook attacks E1 → E1 knockback cancelled (E2 blocks)
+  [Stone+R]  E1 E2    Rook reverts to its original tile — no cascading checks
+```
+
+**Implementation Note:** Bounce-back always returns the piece to `bounce_back_x/y` (its position before the attack). No directional push-off logic needed. This keeps AI complexity low (per Jas, 2026-02-27).
+
 ---
 
 ## Known Gotchas
@@ -507,6 +541,27 @@ The design spec says "hitting wall = stay put". In our implementation, board edg
 1. Place two enemies adjacent
 2. Attack first enemy
 3. Verify first enemy stays put (blocked by second enemy)
+
+### Stepping Stone Knockback Test
+*(Added 2026-02-27)*
+
+1. Place enemy adjacent to a stepping stone
+2. Attack enemy so knockback would push into stone
+3. Verify enemy stays put (stepping stone = wall)
+
+### Stepping Stone Bounce-Back Test
+
+1. Place player piece ON a stepping stone
+2. Attack an enemy with 2+ HP (survives the hit)
+3. Verify player piece reverts to its original position (on the stepping stone)
+4. Verify stepping stone remains in place (immovable)
+
+### Stepping Stone Chain Test
+
+1. Set up: stepping stone under rook, enemy ahead, second enemy behind first
+2. Rook attacks forward
+3. Verify: first enemy knockback cancelled (blocked by second enemy)
+4. Verify: rook reverts to its original tile (on the stepping stone) — no cascading push
 
 ---
 

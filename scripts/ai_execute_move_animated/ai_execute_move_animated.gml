@@ -66,10 +66,9 @@ function ai_execute_move_animated(move) {
         return true;
     }
     
-    // Handle capture BEFORE moving
+    // Defer capture until animation completes (prevents piece disappearing at start of animation)
     if (move.is_capture && move.captured_piece != noone && instance_exists(move.captured_piece)) {
-        instance_destroy(move.captured_piece);
-        audio_play_sound_on(piece.audio_emitter, Piece_Capture_SFX, 0, false);
+        piece.pending_capture = move.captured_piece;
     }
     
     // Set up animated move

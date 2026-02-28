@@ -24,12 +24,23 @@ for (var dir = 0; dir < array_length(direction_moves); dir++) {
         
         // Check if position is occupied
         var piece = instance_place(check_x, check_y, Chess_Piece_Obj);
+        var hostile = noone;
+        var _check_col = round((check_x - Object_Manager.topleft_x) / tile_size);
+        var _check_row = round((check_y - Object_Manager.topleft_y) / tile_size);
+        with (Enemy_Obj) {
+            if (!is_dead && grid_col == _check_col && grid_row == _check_row) { hostile = id; break; }
+        }
         
         // Add this position to valid_moves array
         array_push(valid_moves, [dx * dist, dy * dist]);
         
-        // If we hit a piece, stop checking this direction
+        // If we hit a piece or enemy, stop checking this direction
         if (piece) break;
+        if (hostile) break;
+        
+        // Stepping stones block sliding pieces — can land ON but not pass THROUGH
+        var _stone = instance_position(check_x, check_y, Stepping_Stone_Obj);
+        if (_stone != noone) break;
         
         // If path crosses water, stop (unless there's a bridge).
         if (tile.tile_type == 1) {

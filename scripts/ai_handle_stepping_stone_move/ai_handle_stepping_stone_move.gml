@@ -92,6 +92,21 @@ function ai_handle_stepping_stone_move() {
                     continue;
                 }
                 
+                // Can't hop stone-to-stone (prevents AI double stone stepping)
+                var _other_stone = instance_position(check_cx, check_cy, Stepping_Stone_Obj);
+                if (_other_stone == noone) _other_stone = instance_position(target_x, target_y, Stepping_Stone_Obj);
+                if (_other_stone != noone && _other_stone != on_stone) {
+                    show_debug_message("AI: Another stepping stone at target — skipping");
+                    continue;
+                }
+                
+                // Can't land on enemies
+                var _enemy_check = instance_position(check_cx, check_cy, Enemy_Obj);
+                if (_enemy_check != noone && !_enemy_check.is_dead) {
+                    show_debug_message("AI: Enemy at target — skipping");
+                    continue;
+                }
+                
                 // Valid move found
                 var move_data = {
                     piece: piece,
@@ -306,6 +321,14 @@ function ai_handle_stepping_stone_move() {
                     var target_piece = instance_position(_tcx, _tcy, Chess_Piece_Obj);
                     if (target_piece == noone) target_piece = instance_position(target_x, target_y, Chess_Piece_Obj);
                     if (target_piece == piece) target_piece = noone; // Exclude self
+                    
+                    // Can't land on another stepping stone in phase 2 either
+                    var _p2_stone = instance_position(_tcx, _tcy, Stepping_Stone_Obj);
+                    if (_p2_stone == noone) _p2_stone = instance_position(target_x, target_y, Stepping_Stone_Obj);
+                    if (_p2_stone != noone) {
+                        show_debug_message("AI: Phase2 skip — stepping stone at target");
+                        continue;
+                    }
                     
                     // Pawn-specific rules: can only capture diagonally, forward must be empty
                     var is_capture = false;

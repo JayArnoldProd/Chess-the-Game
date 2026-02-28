@@ -22,12 +22,60 @@ if (is_moving) {
 // 2. Movement Interpolation (Animation)
 if (is_moving) {
     move_progress += 1 / move_duration;
+    
+    // Deferred enemy damage — apply at 80% through animation (impact feel)
+    if (pending_enemy_damage != noone && move_progress >= 0.8) {
+        var _target_enemy = pending_enemy_damage;
+        var _atk_col = pending_enemy_damage_col;
+        var _atk_row = pending_enemy_damage_row;
+        pending_enemy_damage = noone;  // Clear immediately
+        
+        if (instance_exists(_target_enemy) && !_target_enemy.is_dead) {
+            var _dmg_result = enemy_take_damage(_target_enemy, 1, _atk_col, _atk_row, id);
+            
+            if (_dmg_result.died) {
+                has_moved = true;
+                pending_normal_move = true;
+                pending_turn_switch = (piece_type == 0) ? 1 : 0;
+                show_debug_message("Enemy killed on impact — piece stays.");
+            } else if (_dmg_result.knocked_back) {
+                has_moved = true;
+                pending_normal_move = true;
+                pending_turn_switch = (piece_type == 0) ? 1 : 0;
+                show_debug_message("Enemy knocked back on impact — piece occupies tile.");
+            } else {
+                bounce_back_pending = true;
+                bounce_back_x = move_start_x;
+                bounce_back_y = move_start_y;
+                show_debug_message("Enemy knockback blocked on impact — piece will bounce back.");
+            }
+        } else {
+            has_moved = true;
+            pending_normal_move = true;
+            pending_turn_switch = (piece_type == 0) ? 1 : 0;
+        }
+    }
+    
     if (move_progress >= 1) {
         move_progress = 1;
         is_moving = false;
-        // Snap exactly to the target grid.
         x = move_target_x;
         y = move_target_y;
+        
+        // Bounce-back: piece attacked an enemy that survived, return to origin
+        if (bounce_back_pending) {
+            bounce_back_pending = false;
+            move_start_x = x;
+            move_start_y = y;
+            move_target_x = bounce_back_x;
+            move_target_y = bounce_back_y;
+            move_progress = 0;
+            move_duration = 15;
+            is_moving = true;
+            move_animation_type = "linear";
+            pending_turn_switch = (piece_type == 0) ? 1 : 0;
+            show_debug_message("Bounce-back: returning to (" + string(bounce_back_x) + "," + string(bounce_back_y) + ")");
+        }
     } else {
         var t = easeInOutQuad(move_progress);
         if (move_animation_type == "linear") {
@@ -77,30 +125,60 @@ if (!(piece_type == 1 && Game_Manager.turn == 1)) {
     if (!is_moving) {
         // Only PLAYER pieces (piece_type == 0) should auto-detect stepping stones
         // AI pieces use ai_execute_move_animated which sets up stepping stone state explicitly
-        if (stepping_chain == 0 && piece_type == 0 && !stepping_stone_used) {
+        if (stepping_chain == 0 && piece_type == 0 && !stepping_stone_used && Game_Manager.turn == 0) {
             var stone = instance_position(x, y, Stepping_Stone_Obj);
             if (stone != noone) {
-                // Use previous frame's position as reference.
-                pre_stepping_x = last_x;
-                pre_stepping_y = last_y;
-                
-                extra_move_pending = true;
-                stepping_chain = 2;  // Phase 1 extra move pending.
-                stepping_stone_instance = stone;
-                stone_original_x = stone.x;
-                stone_original_y = stone.y;
-                show_debug_message("Stepping stone activated! Extra move phase 1 available.");
+                // Don't activate if the stone is mid-animation (being used by AI)
+                if (variable_instance_exists(stone, "is_moving") && stone.is_moving) {
+                    // Stone is animating — ignore it
+                } else {
+                    // Use previous frame's position as reference.
+                    pre_stepping_x = last_x;
+                    pre_stepping_y = last_y;
+                    
+                    extra_move_pending = true;
+                    stepping_chain = 2;  // Phase 1 extra move pending.
+                    stepping_stone_instance = stone;
+                    stone_original_x = stone.x;
+                    stone_original_y = stone.y;
+                    show_debug_message("Stepping stone activated! Extra move phase 1 available.");
+                }
             }
         }
     }
 
     // While in extra–move Phase 1, override valid moves to the 8 adjacent directions.
+    // SAFETY: If a player piece somehow has stepping_chain > 0 but no valid stone, reset it
+    if (stepping_chain > 0 && piece_type == 0 && !instance_exists(stepping_stone_instance)) {
+        show_debug_message("SAFETY: Resetting corrupt stepping_chain on player piece at (" + string(x) + "," + string(y) + ")");
+        stepping_chain = 0;
+        extra_move_pending = false;
+        stepping_stone_instance = noone;
+    }
+    
     // Only applies to player pieces - AI calculates its own valid moves
     if (!is_moving && stepping_chain == 2 && piece_type == 0) {
         valid_moves = [];
         for (var dx = -1; dx <= 1; dx++) {
             for (var dy = -1; dy <= 1; dy++) {
                 if (dx != 0 || dy != 0) {
+                    var _check_px = x + dx * Board_Manager.tile_size;
+                    var _check_py = y + dy * Board_Manager.tile_size;
+                    // Use center offset for reliable instance detection
+                    var _check_cx = _check_px + Board_Manager.tile_size / 4;
+                    var _check_cy = _check_py + Board_Manager.tile_size / 4;
+                    // Can't land on enemies
+                    var _blocking_enemy = instance_position(_check_cx, _check_cy, Enemy_Obj);
+                    if (_blocking_enemy == noone) _blocking_enemy = instance_position(_check_px, _check_py, Enemy_Obj);
+                    if (_blocking_enemy != noone && !_blocking_enemy.is_dead) {
+                        continue;
+                    }
+                    // Can't hop stone-to-stone (per Jas ruling 2026-02-27)
+                    var _another_stone = instance_position(_check_cx, _check_cy, Stepping_Stone_Obj);
+                    if (_another_stone == noone) _another_stone = instance_position(_check_px, _check_py, Stepping_Stone_Obj);
+                    if (_another_stone != noone && _another_stone != stepping_stone_instance) {
+                        continue;
+                    }
                     array_push(valid_moves, [dx, dy]);
                 }
             }
@@ -109,7 +187,8 @@ if (!(piece_type == 1 && Game_Manager.turn == 1)) {
 
     // Force the piece to remain selected if in any extra–move chain.
     // Only player pieces should auto-select - AI pieces are controlled by AI_Manager
-    if (stepping_chain > 0 && piece_type == 0) {
+    // Also only during player's turn — prevents AI stepping stone from bleeding into player pieces
+    if (stepping_chain > 0 && piece_type == 0 && Game_Manager.turn == 0) {
         Game_Manager.selected_piece = self;
     }
 }
@@ -169,7 +248,12 @@ if (!is_moving) {
         }
         
         if (!skip_turn_switch) {
-            Game_Manager.turn = pending_turn_switch;
+            // Intercept turn switch: if switching to AI (1) and enemies exist, go to enemy turn (2) first
+            var _next_turn = pending_turn_switch;
+            if (_next_turn == 1 && instance_exists(Enemy_Manager) && array_length(Enemy_Manager.enemy_list) > 0) {
+                _next_turn = 2; // Enemy turn first
+            }
+            Game_Manager.turn = _next_turn;
             pending_turn_switch = undefined;
         }
     }

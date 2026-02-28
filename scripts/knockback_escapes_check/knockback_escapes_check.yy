@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"knockback_escapes_check",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"knockback_escapes_check",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

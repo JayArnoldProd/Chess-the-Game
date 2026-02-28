@@ -1,4 +1,53 @@
-// Game_Manager Step Event - Handle settings interaction via polling
+// Game_Manager Step Event
+
+// --- CHECKMATE DETECTION (player's turn only) ---
+if (turn == 0 && !game_over) {
+    if (ai_is_king_in_check_simple(0)) {
+        // Player king is in check — see if ANY player piece has a legal move
+        var _has_legal_move = false;
+        
+        with (Chess_Piece_Obj) {
+            if (piece_type != 0) continue;  // Skip non-player pieces
+            if (_has_legal_move) break;     // Already found one, done
+            
+            // Check each valid move to see if it escapes check
+            for (var i = 0; i < array_length(valid_moves); i++) {
+                var _mv = valid_moves[i];
+                var _dx = _mv[0];
+                var _dy = _mv[1];
+                var _dest_x = x + _dx * Board_Manager.tile_size;
+                var _dest_y = y + _dy * Board_Manager.tile_size;
+                
+                if (!move_leaves_king_in_check(id, _dest_x, _dest_y)) {
+                    _has_legal_move = true;
+                    break;
+                }
+            }
+            
+            // Also check castle moves for king
+            if (!_has_legal_move && object_index == King_Obj && array_length(castle_moves) > 0) {
+                for (var i = 0; i < array_length(castle_moves); i++) {
+                    var _cm = castle_moves[i];
+                    var _castle_x = x + _cm[0] * Board_Manager.tile_size;
+                    if (!move_leaves_king_in_check(id, _castle_x, y)) {
+                        _has_legal_move = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (!_has_legal_move) {
+            // CHECKMATE!
+            game_over = true;
+            game_over_message = "CHECKMATE!";
+            game_over_timer = 0;
+            show_debug_message("CHECKMATE detected — player has no legal moves!");
+        }
+    }
+}
+
+// Handle settings interaction via polling
 // (Mouse_6 was Middle Button Pressed which never fires; use Step + mouse_check instead)
 
 if (mouse_check_button_pressed(mb_left)) {

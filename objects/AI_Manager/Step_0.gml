@@ -133,6 +133,16 @@ switch (ai_state) {
         ai_search_moves = ai_generate_moves_world_aware(ai_search_board, 1); // AI is black (1)
         
         if (array_length(ai_search_moves) == 0) {
+            // DEBUG: Log board state when AI thinks it has no moves
+            show_debug_message("AI: ZERO LEGAL MOVES detected! Dumping board state:");
+            for (var _dbg_r = 0; _dbg_r < 8; _dbg_r++) {
+                var _row_str = "  Row " + string(_dbg_r) + ": ";
+                for (var _dbg_c = 0; _dbg_c < 8; _dbg_c++) {
+                    var _p = ai_search_board[_dbg_r * 8 + _dbg_c];
+                    _row_str += string(_p) + " ";
+                }
+                show_debug_message(_row_str);
+            }
             // Check if this is checkmate (AI king in check with no escapes) or stalemate
             var ai_in_check = ai_is_king_in_check_virtual(ai_search_board, 1);
             if (ai_in_check) {
@@ -140,7 +150,8 @@ switch (ai_state) {
                 // AI is checkmated - player wins
                 if (instance_exists(Game_Manager)) {
                     Game_Manager.game_over = true;
-                    Game_Manager.winner = 0; // White (player) wins
+                    Game_Manager.game_over_message = "CHECKMATE!\nWhite Wins!";
+                    Game_Manager.game_over_timer = 0;
                     show_debug_message("AI: Setting game_over=true, winner=0 (player)");
                 }
             } else {
@@ -148,7 +159,8 @@ switch (ai_state) {
                 // Stalemate - draw
                 if (instance_exists(Game_Manager)) {
                     Game_Manager.game_over = true;
-                    Game_Manager.winner = -1; // Draw
+                    Game_Manager.game_over_message = "STALEMATE!\nDraw!";
+                    Game_Manager.game_over_timer = 0;
                 }
             }
             ai_state = "idle";
@@ -342,13 +354,15 @@ switch (ai_state) {
                     show_debug_message("AI: CHECKMATE (fallback path)! No legal moves while in check.");
                     if (instance_exists(Game_Manager)) {
                         Game_Manager.game_over = true;
-                        Game_Manager.winner = 0; // Player wins
+                        Game_Manager.game_over_message = "CHECKMATE!\nWhite Wins!";
+                        Game_Manager.game_over_timer = 0;
                     }
                 } else {
                     show_debug_message("AI: STALEMATE (fallback path)! No legal moves.");
                     if (instance_exists(Game_Manager)) {
                         Game_Manager.game_over = true;
-                        Game_Manager.winner = -1; // Draw
+                        Game_Manager.game_over_message = "STALEMATE!\nDraw!";
+                        Game_Manager.game_over_timer = 0;
                     }
                 }
                 ai_state = "idle";

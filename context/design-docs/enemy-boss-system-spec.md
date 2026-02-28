@@ -45,6 +45,20 @@ Each enemy type defines which attack type(s) it uses.
 - **Enemies cannot capture other enemies** — knockback into another enemy treats that enemy as an immovable wall (knocked-back enemy stays put)
 - **Multiple enemies targeting the same piece:** The first enemy to highlight gets priority and strikes first. The second enemy then tries to move toward the (now empty) tile; if another enemy is already there, it gets pushed back to its square
 
+### Stepping Stone Interaction
+*(Added 2026-02-27, per Jas ruling)*
+
+- **Stepping stones are WALLS to enemies** — enemies cannot occupy stepping stone tiles and cannot use stepping stone mechanics (stepping stones are a player-only mechanic)
+- **Stepping stones are IMMOVABLE** — nothing can push or knockback a stepping stone; they are fixed objects on the board
+- **Knockback into stepping stone = cancelled** — if an enemy is knocked back into a tile occupied by a `Stepping_Stone_Obj`, the knockback is blocked (same as hitting a wall) and the enemy stays put
+- **Piece bounce-back is always a simple revert** — when a piece attacks an immovable target (enemy that survives, knockback blocked, etc.), the piece simply **reverts to its pre-attack position**. No secondary knockback calculations in the opposite direction. Attack animation plays forward, then piece returns to where it started. This keeps complexity low and avoids making the AI dumber with cascading knockback checks.
+
+**Example:**
+> Stepping stone behind a rook, enemy ahead, another enemy behind that enemy.
+> - Rook attacks forward → first enemy's knockback is cancelled (second enemy behind it blocks)
+> - Rook reverts to its original tile (the stepping stone tile it attacked from)
+> - Simple rule: attack, revert. No cascading directional checks.
+
 ### Spawning
 - **Default:** Enemies spawn randomly on **ranks 8, 7, or 6** (the back three rows)
 - **Customizable:** Some enemies can have special spawn conditions:
@@ -185,3 +199,6 @@ Bosses are **chess AI opponents** — both the player and the boss have full sta
 | 13 | Boss levels + enemies | Boss levels are chess-only (no standalone enemies), just pieces + gimmicks |
 | 14 | Enemy death effects | Shake red, fade away |
 | 15 | Knockback into other enemies | Other enemy is immovable wall; knocked-back enemy stays put |
+| 16 | Knockback as check escape | If a piece can knock an enemy into the path of a check threat, that counts as a legal check escape. **Yellow indicator** (risky move). Enemy may move away next turn, reopening the threat — that's the player's risk. If king has no escape after enemy moves, game over. |
+| 17 | Kill shot ≠ block | If the enemy would die from the attack (1 HP), no body remains to block — does NOT count as a check escape (unless the attacking piece itself blocks the threat line). |
+| 18 | Enemies don't cause check | Enemies are separate from the chess ruleset. An enemy adjacent to the king does NOT put it in check. Enemies threaten via their own attack system (melee/ranged), not chess rules. |

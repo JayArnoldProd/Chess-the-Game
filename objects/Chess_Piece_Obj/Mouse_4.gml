@@ -46,14 +46,21 @@ if (Game_Manager.selected_piece != noone && Game_Manager.selected_piece != self)
         prev_piece.x = prev_piece.original_turn_x;
         prev_piece.y = prev_piece.original_turn_y;
         prev_piece.has_moved = prev_piece.original_has_moved;
+        prev_piece.is_moving = false;  // Stop any animation
+        prev_piece.move_progress = 0;
+        prev_piece.pending_turn_switch = undefined;
+        prev_piece.pending_normal_move = false;
+        prev_piece.stepping_stone_used = false;
         if (instance_exists(prev_piece.stepping_stone_instance)) {
             prev_piece.stepping_stone_instance.x = prev_piece.stone_original_x;
             prev_piece.stepping_stone_instance.y = prev_piece.stone_original_y;
+            prev_piece.stepping_stone_instance.is_moving = false;
         }
         prev_piece.stepping_chain = 0;
         prev_piece.extra_move_pending = false;
         prev_piece.stepping_stone_instance = noone;
-        show_debug_message("Extra–move chain canceled; previous piece reverted.");
+        show_debug_message("Extra–move chain canceled; previous piece reverted to (" + 
+            string(prev_piece.original_turn_x) + "," + string(prev_piece.original_turn_y) + ")");
         
         // Set the cancellation flag
         Game_Manager.moveCancelled = true;

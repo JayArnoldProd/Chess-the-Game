@@ -73,3 +73,8 @@ instance_create_depth(army_x,army_y,0,Player_Army_Manager);
 if (!instance_exists(AI_Manager)) {
     instance_create_depth(x, y, 0, AI_Manager);
 }
+
+// Create Enemy Manager
+if (!instance_exists(Enemy_Manager)) {
+    instance_create_depth(x, y, 0, Enemy_Manager);
+}

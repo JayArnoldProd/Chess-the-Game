@@ -55,16 +55,25 @@ if (valid_move and (selected_piece != noone)) {
         if (piece.stepping_chain == 0) {
             // Initial move — if landing on a stepping stone, allow it
             // Stepping stones grant extra moves, so the piece can escape to safety
-            if (instance_position(x, y, Stepping_Stone_Obj) != noone) {
+            // BUT NOT if there's an enemy on the tile (attacking, not using stone)
+            var _stone_here = instance_position(x, y, Stepping_Stone_Obj);
+            var _enemy_on_stone = instance_position(x, y, Enemy_Obj);
+            if (_enemy_on_stone == noone) _enemy_on_stone = instance_position(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Enemy_Obj);
+            if (_stone_here != noone && _enemy_on_stone == noone) {
                 skip_check = true;
             }
         }
         if (!skip_check) {
             // Player piece - verify this move doesn't leave king in check
             if (move_leaves_king_in_check(piece, x, y)) {
-                show_debug_message("Move blocked: would leave king in check!");
-                valid_move = false;
-                exit;
+                // Check if knockback would block the check (yellow indicator move)
+                if (knockback_escapes_check(piece, x, y)) {
+                    show_debug_message("Risky move allowed: knockback blocks check!");
+                } else {
+                    show_debug_message("Move blocked: would leave king in check!");
+                    valid_move = false;
+                    exit;
+                }
             }
         }
     }
@@ -99,6 +108,13 @@ if (valid_move and (selected_piece != noone)) {
         }
         else if (piece.stepping_chain == 1) {
             // --- EXTRA MOVE PHASE 2 ---
+            // Can't land on another stepping stone (per Jas ruling 2026-02-27)
+            var _dest_stone = instance_position(x, y, Stepping_Stone_Obj);
+            if (_dest_stone != noone && _dest_stone != piece.stepping_stone_instance) {
+                show_debug_message("Phase 2: Can't land on another stepping stone!");
+                valid_move = false;
+                exit;
+            }
             piece.move_start_x = piece.x;
             piece.move_start_y = piece.y;
             piece.move_target_x = x;
@@ -127,7 +143,7 @@ if (valid_move and (selected_piece != noone)) {
             piece.stepping_stone_used = true;  // Prevent re-activation if landing on another stone
             show_debug_message("Stepping stone phase 2 complete; turn ends.");
             
-            // Capture check for extra move (using your original loop):
+            // Capture check for extra move (chess pieces):
             var enemyFound = noone;
             var cnt = instance_number(Chess_Piece_Obj);
             for (var i = 0; i < cnt; i++) {
@@ -141,6 +157,24 @@ if (valid_move and (selected_piece != noone)) {
             }
             if (enemyFound != noone) {
                 piece.pending_capture = enemyFound; // Defer capture until animation completes.
+            }
+            
+            // En passant check for stepping stone phase 2 (pawns only)
+            if (piece.piece_id == "pawn" && enemyFound == noone) {
+                if (x == Game_Manager.en_passant_target_x && y == Game_Manager.en_passant_target_y) {
+                    if (instance_exists(Game_Manager.en_passant_pawn)) {
+                        piece.pending_capture = Game_Manager.en_passant_pawn;
+                        show_debug_message("En passant capture during stepping stone phase 2!");
+                    }
+                }
+            }
+            
+            // Enemy (hostile unit) — defer damage to Step_0 (same as normal moves)
+            var _hostile = instance_position(x, y, Enemy_Obj);
+            if (_hostile != noone && !_hostile.is_dead) {
+                piece.pending_enemy_damage = _hostile;
+                piece.pending_enemy_damage_col = round((piece.x - Object_Manager.topleft_x) / Board_Manager.tile_size);
+                piece.pending_enemy_damage_row = round((piece.y - Object_Manager.topleft_y) / Board_Manager.tile_size);
             }
             
             // Mark turn switch (to occur after animation completes).
@@ -223,10 +257,21 @@ if (valid_move and (selected_piece != noone)) {
             // Don't set pending_turn_switch — stepping stone will activate in Step_0
         }
     
-        // Normal capture check.
+        // Normal capture check (chess pieces).
         var enemy = instance_position(x, y, Chess_Piece_Obj);
         if (enemy != noone && enemy != piece && enemy.piece_type != piece.piece_type) {
             piece.pending_capture = enemy;
+        }
+        
+        // Enemy (hostile unit) capture check — DEFER damage until piece arrives
+        var hostile = instance_position(x, y, Enemy_Obj);
+        var _has_enemy_target = false;
+        if (hostile != noone && !hostile.is_dead) {
+            // Store damage info on piece — will be applied when animation completes
+            piece.pending_enemy_damage = hostile;
+            piece.pending_enemy_damage_col = round((piece.x - Object_Manager.topleft_x) / Board_Manager.tile_size);
+            piece.pending_enemy_damage_row = round((piece.y - Object_Manager.topleft_y) / Board_Manager.tile_size);
+            _has_enemy_target = true;
         }
     
         // Set up animated move.
@@ -235,21 +280,30 @@ if (valid_move and (selected_piece != noone)) {
         piece.move_target_x = x;
         piece.move_target_y = y;
         piece.move_progress = 0;
-        piece.move_duration = 30;
+        piece.move_duration = 15;  // Faster attack animation when hitting enemy
         piece.is_moving = true;
         // For normal moves, knights use their L-shaped animation.
         piece.move_animation_type = (piece.piece_id == "knight") ? "knight" : "linear";
-        piece.has_moved = true;
-    
-        // En passant capture check:
-        if (piece.piece_id == "pawn") {
-            if (x == Game_Manager.en_passant_target_x && y == Game_Manager.en_passant_target_y) {
-                piece.pending_en_passant = true;
-            } else {
-                piece.pending_en_passant = false;
+        
+        if (_has_enemy_target) {
+            // Enemy attack — lunge toward enemy, damage applied on arrival in Step_0
+            // Step_0 will decide: bounce back (blocked) or land (knocked back/killed)
+            piece.move_duration = 15;  // Quick lunge
+            // Don't set has_moved or pending_normal_move yet — Step_0 handles after damage
+        } else {
+            piece.has_moved = true;
+            piece.move_duration = 30;  // Normal move speed
+        
+            // En passant capture check:
+            if (piece.piece_id == "pawn") {
+                if (x == Game_Manager.en_passant_target_x && y == Game_Manager.en_passant_target_y) {
+                    piece.pending_en_passant = true;
+                } else {
+                    piece.pending_en_passant = false;
+                }
             }
+            piece.pending_normal_move = true;
         }
-        piece.pending_normal_move = true;
     
         // WATER / VOID CHECKS:
         // Save the tile's coordinates in local variables.

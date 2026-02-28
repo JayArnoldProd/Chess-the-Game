@@ -341,6 +341,54 @@ Chess-the-Game/
 
 ---
 
+## Object_Manager Spawn Grid System
+
+The Object_Manager handles spawning board gimmicks (stepping stones, bridges, etc.) using a data-driven grid system.
+
+### Structure
+
+```gml
+// 1. Define what objects can spawn (ID → Object mapping)
+object_definitions = [
+    [Stepping_Stone_Obj, 1],   // ID 1 = Stepping Stone
+    // [Enemy_Obj, 2],         // ID 2 = Enemy (future)
+];
+
+// 2. Define WHERE objects spawn per room (8×8 grids)
+object_locations = [
+    [  // Per object type
+        [  // Array of layout variants (one picked randomly each game)
+            [ 0,0,0,0,0,0,0,0,  // Layout 1: 64-element flat array
+              0,0,0,0,0,0,0,0,  // Maps to 8×8 grid (row-major)
+              ...                // Non-zero values = spawn object with that ID
+              0,0,0,0,0,0,0,0 ],
+            [ ... ],             // Layout 2 (alternative)
+            [ ... ],             // Layout 3, etc.
+        ]
+    ]
+];
+```
+
+### How Spawning Works (Step_0.gml)
+1. For each object type in `object_locations`
+2. For each layout set, randomly pick one layout variant
+3. Walk the 64-element array: `grid_x = i mod 8`, `grid_y = i div 8`
+4. If value > 0, look up the object type from `object_definitions` and spawn at `topleft_x + grid_x * tile_size`
+
+### Room-Specific Layouts
+
+| Room | Object | Variants | Notes |
+|------|--------|----------|-------|
+| Ruined Overworld | Stepping Stones | 6 | 3 stones in middle rows, various positions |
+| Pirate Seas | (bridges handled separately) | 1 | Empty grid placeholder |
+| Fear Factory | (belts in room editor) | 1 | Empty grid placeholder |
+| All others | — | 1 | Empty grid placeholders ready for use |
+
+### Extending for Enemies
+The same system can be used for enemy spawns by adding a new ID to `object_definitions` and populating `object_locations` with enemy placement grids. This is planned in PRP-009.
+
+---
+
 ## Key Architectural Decisions
 
 ### 1. Virtual Board for AI Search
