@@ -99,8 +99,7 @@ function enemy_process_turn(_enemy) {
             }
             
             // Stepping stones are walls to enemies (per Jas ruling 2026-02-27)
-            var _stone = instance_place(_cx, _cy, Stepping_Stone_Obj);
-            if (_stone == noone) _stone = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Stepping_Stone_Obj);
+            var _stone = instance_position(_px + Board_Manager.tile_size * 0.5, _py + Board_Manager.tile_size * 0.5, Stepping_Stone_Obj);
             if (_stone == noone) _stone = instance_place(_px, _py, Stepping_Stone_Obj);
             if (_stone != noone) {
                 _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=stone ";

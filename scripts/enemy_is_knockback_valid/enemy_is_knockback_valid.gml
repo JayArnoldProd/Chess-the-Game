@@ -27,7 +27,8 @@ function enemy_is_knockback_valid(_enemy, _col, _row) {
     }
     
     // Stepping stone = wall (immovable, per Jas ruling 2026-02-27)
-    var _stone = instance_position(_x, _y, Stepping_Stone_Obj);
+    var _stone = instance_position(_x + Board_Manager.tile_size * 0.5, _y + Board_Manager.tile_size * 0.5, Stepping_Stone_Obj);
+    if (_stone == noone) _stone = instance_position(_x + Board_Manager.tile_size * 0.25, _y + Board_Manager.tile_size * 0.25, Stepping_Stone_Obj);
     if (_stone != noone) {
         return false;
     }
