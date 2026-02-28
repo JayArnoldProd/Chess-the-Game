@@ -20,35 +20,58 @@ if (is_moving) {
         // Hazard check after landing (e.g. conveyor pushed onto water/void)
         var _cx = x + Board_Manager.tile_size / 2;
         var _cy = y + Board_Manager.tile_size / 2;
-        var _landed_tile = instance_position(_cx, _cy, Tile_Obj);
-        if (_landed_tile == noone) _landed_tile = instance_position(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Tile_Obj);
-        if (_landed_tile == noone) _landed_tile = instance_position(x, y, Tile_Obj);
+        // Prefer world tile map (align with AI/world system)
+        var _world = ai_build_virtual_world();
+        var _tiles = (_world != undefined) ? _world.tiles : undefined;
+        var _bridges = (_world != undefined) ? _world.objects.bridges : undefined;
         
-        if (_landed_tile != noone && variable_instance_exists(_landed_tile, "tile_type")) {
-            if (_landed_tile.tile_type == 1) {
-                // Water — check for bridge
-                var _bridge = instance_position(_cx, _cy, Bridge_Obj);
-                if (_bridge == noone) _bridge = instance_position(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Bridge_Obj);
-                if (_bridge == noone) _bridge = instance_position(x, y, Bridge_Obj);
-                if (_bridge == noone) {
+        if (_tiles != undefined && grid_col >= 0 && grid_col < 8 && grid_row >= 0 && grid_row < 8) {
+            var _tile_type = _tiles[grid_row][grid_col];
+            if (_tile_type == 1) {
+                var _has_bridge = false;
+                if (_bridges != undefined) {
+                    for (var b = 0; b < array_length(_bridges); b++) {
+                        if (_bridges[b].col == grid_col && _bridges[b].row == grid_row) { _has_bridge = true; break; }
+                    }
+                }
+                if (!_has_bridge) {
                     show_debug_message("Enemy drowned at (" + string(grid_col) + "," + string(grid_row) + ")");
                     audio_play_sound(Piece_Drowning_SFX, 0, false);
                     is_dead = true;
                 }
-            } else if (_landed_tile.tile_type == -1) {
-                // Void
+            } else if (_tile_type == -1) {
                 show_debug_message("Enemy fell into void at (" + string(grid_col) + "," + string(grid_row) + ")");
                 is_dead = true;
             }
         } else {
-            // No tile found — if no bridge, treat as open water
-            var _bridge = instance_position(_cx, _cy, Bridge_Obj);
-            if (_bridge == noone) _bridge = instance_position(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Bridge_Obj);
-            if (_bridge == noone) _bridge = instance_position(x, y, Bridge_Obj);
-            if (_bridge == noone) {
-                show_debug_message("Enemy drowned at (" + string(grid_col) + "," + string(grid_row) + ") — no tile + no bridge");
-                audio_play_sound(Piece_Drowning_SFX, 0, false);
-                is_dead = true;
+            // Fallback: instance checks
+            var _landed_tile = instance_place(_cx, _cy, Tile_Obj);
+            if (_landed_tile == noone) _landed_tile = instance_place(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Tile_Obj);
+            if (_landed_tile == noone) _landed_tile = instance_place(x, y, Tile_Obj);
+            
+            if (_landed_tile != noone && variable_instance_exists(_landed_tile, "tile_type")) {
+                if (_landed_tile.tile_type == 1) {
+                    var _bridge = instance_place(_cx, _cy, Bridge_Obj);
+                    if (_bridge == noone) _bridge = instance_place(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Bridge_Obj);
+                    if (_bridge == noone) _bridge = instance_place(x, y, Bridge_Obj);
+                    if (_bridge == noone) {
+                        show_debug_message("Enemy drowned at (" + string(grid_col) + "," + string(grid_row) + ")");
+                        audio_play_sound(Piece_Drowning_SFX, 0, false);
+                        is_dead = true;
+                    }
+                } else if (_landed_tile.tile_type == -1) {
+                    show_debug_message("Enemy fell into void at (" + string(grid_col) + "," + string(grid_row) + ")");
+                    is_dead = true;
+                }
+            } else {
+                var _bridge = instance_place(_cx, _cy, Bridge_Obj);
+                if (_bridge == noone) _bridge = instance_place(x + Board_Manager.tile_size / 4, y + Board_Manager.tile_size / 4, Bridge_Obj);
+                if (_bridge == noone) _bridge = instance_place(x, y, Bridge_Obj);
+                if (_bridge == noone) {
+                    show_debug_message("Enemy drowned at (" + string(grid_col) + "," + string(grid_row) + ") — no tile + no bridge");
+                    audio_play_sound(Piece_Drowning_SFX, 0, false);
+                    is_dead = true;
+                }
             }
         }
         

@@ -20,6 +20,12 @@ function enemy_process_turn(_enemy) {
     show_debug_message("Enemy at (" + string(_enemy.grid_col) + "," + string(_enemy.grid_row) + 
         ") targeting " + _target.piece_id + " at (" + string(_target_col) + "," + string(_target_row) + ")");
     
+    // Build world tile map once (aligns with AI/world systems)
+    var _world = ai_build_virtual_world();
+    var _tiles = (_world != undefined) ? _world.tiles : undefined;
+    var _bridges = (_world != undefined) ? _world.objects.bridges : undefined;
+    var _board = (_world != undefined) ? _world.board : undefined;
+    
     // Evaluate all 8 adjacent tiles, pick the one closest to target
     var _best_col = _enemy.grid_col;
     var _best_row = _enemy.grid_row;
@@ -43,58 +49,68 @@ function enemy_process_turn(_enemy) {
             var _cx = _px + Board_Manager.tile_size / 2;
             var _cy = _py + Board_Manager.tile_size / 2;
             
-            // Check for tile existence (no tile = could be water row or off board)
-            var _tile = instance_position(_cx, _cy, Tile_Obj);
-            if (_tile == noone) _tile = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Tile_Obj);
-            if (_tile == noone) _tile = instance_position(_px, _py, Tile_Obj);
-            
-            if (_tile == noone) {
-                // No Tile_Obj here — check if there's a bridge (water rows use Bridge_Obj, not Tile_Obj)
-                var _bridge = instance_position(_cx, _cy, Bridge_Obj);
-                if (_bridge == noone) _bridge = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Bridge_Obj);
-                if (_bridge == noone) _bridge = instance_position(_px, _py, Bridge_Obj);
-                if (_bridge != noone) {
-                    // Bridge exists — allow movement across water
-                    // (fall through to remaining checks below)
-                } else {
-                    // No tile AND no bridge = off board or open water
-                    _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=no_tile ";
+            // Tile type from world map (align with AI/world system)
+            if (_tiles != undefined) {
+                var _tile_type = _tiles[_row][_col];
+                if (_tile_type == -1) {
+                    _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=void ";
                     continue;
                 }
+                if (_tile_type == 1) {
+                    var _has_bridge = false;
+                    if (_bridges != undefined) {
+                        for (var b = 0; b < array_length(_bridges); b++) {
+                            if (_bridges[b].col == _col && _bridges[b].row == _row) { _has_bridge = true; break; }
+                        }
+                    }
+                    if (!_has_bridge) {
+                        _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=water ";
+                        continue;
+                    }
+                }
             } else {
-                // Tile exists — check for water/void
-                if (variable_instance_exists(_tile, "tile_type")) {
+                // Fallback: instance checks if world map unavailable
+                var _tile = instance_place(_cx, _cy, Tile_Obj);
+                if (_tile == noone) _tile = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Tile_Obj);
+                if (_tile == noone) _tile = instance_place(_px, _py, Tile_Obj);
+                if (_tile == noone) {
+                    var _bridge = instance_place(_cx, _cy, Bridge_Obj);
+                    if (_bridge == noone) _bridge = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Bridge_Obj);
+                    if (_bridge == noone) _bridge = instance_place(_px, _py, Bridge_Obj);
+                    if (_bridge == noone) {
+                        _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=no_tile ";
+                        continue;
+                    }
+                } else if (variable_instance_exists(_tile, "tile_type")) {
                     if (_tile.tile_type == -1) {
                         _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=void ";
                         continue;
                     }
                     if (_tile.tile_type == 1) {
-                        // Water tile with Tile_Obj — check for bridge
-                        var _bridge = instance_position(_cx, _cy, Bridge_Obj);
-                        if (_bridge == noone) _bridge = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Bridge_Obj);
-                        if (_bridge == noone) _bridge = instance_position(_px, _py, Bridge_Obj);
+                        var _bridge = instance_place(_cx, _cy, Bridge_Obj);
+                        if (_bridge == noone) _bridge = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Bridge_Obj);
+                        if (_bridge == noone) _bridge = instance_place(_px, _py, Bridge_Obj);
                         if (_bridge == noone) {
                             _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=water ";
                             continue;
                         }
-                        // Has bridge — allow movement
                     }
                 }
             }
             
             // Stepping stones are walls to enemies (per Jas ruling 2026-02-27)
-            var _stone = instance_position(_cx, _cy, Stepping_Stone_Obj);
-            if (_stone == noone) _stone = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Stepping_Stone_Obj);
-            if (_stone == noone) _stone = instance_position(_px, _py, Stepping_Stone_Obj);
+            var _stone = instance_place(_cx, _cy, Stepping_Stone_Obj);
+            if (_stone == noone) _stone = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Stepping_Stone_Obj);
+            if (_stone == noone) _stone = instance_place(_px, _py, Stepping_Stone_Obj);
             if (_stone != noone) {
                 _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=stone ";
                 continue;
             }
             
             // Factory droppers are deadly — avoid them
-            var _dropper = instance_position(_cx, _cy, Factory_Dropper_Obj);
-            if (_dropper == noone) _dropper = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Factory_Dropper_Obj);
-            if (_dropper == noone) _dropper = instance_position(_px, _py, Factory_Dropper_Obj);
+            var _dropper = instance_place(_cx, _cy, Factory_Dropper_Obj);
+            if (_dropper == noone) _dropper = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Factory_Dropper_Obj);
+            if (_dropper == noone) _dropper = instance_place(_px, _py, Factory_Dropper_Obj);
             if (_dropper != noone) {
                 _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=dropper ";
                 continue;
@@ -114,28 +130,44 @@ function enemy_process_turn(_enemy) {
                 continue;
             }
             
-            // Check for chess pieces on this tile
-            var _piece_on_tile = instance_position(_cx, _cy, Chess_Piece_Obj);
-            if (_piece_on_tile == noone) _piece_on_tile = instance_position(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Chess_Piece_Obj);
-            if (_piece_on_tile == noone) _piece_on_tile = instance_position(_px, _py, Chess_Piece_Obj);
-            
-            // If there's a piece on the tile
-            var _is_capture = false;
-            if (_piece_on_tile != noone) {
-                // Don't move onto AI pieces (piece_type == 1)
-                if (_piece_on_tile.piece_type == 1) {
+            // Check for chess pieces on this tile (use board map first, then instance checks)
+            var _piece_on_tile = noone;
+            var _piece_struct = (_board != undefined) ? _board[_row][_col] : noone;
+            if (_piece_struct != noone) {
+                // Block AI pieces, allow capture of player pieces (non-king)
+                if (_piece_struct.piece_type == 1) {
                     _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=ally ";
                     continue;
                 }
-                
-                // Don't capture the king directly
-                if (_piece_on_tile.piece_id == "king") {
+                if (_piece_struct.piece_id == "king") {
                     _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=king ";
                     continue;
                 }
-                
-                // Can capture player pieces (piece_type == 0, not king)
-                _is_capture = true;
+            } else {
+                _piece_on_tile = instance_place(_cx, _cy, Chess_Piece_Obj);
+                if (_piece_on_tile == noone) _piece_on_tile = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Chess_Piece_Obj);
+                if (_piece_on_tile == noone) _piece_on_tile = instance_place(_px, _py, Chess_Piece_Obj);
+            }
+            
+            // If there's a piece on the tile
+            var _is_capture = false;
+            if (_piece_struct != noone || _piece_on_tile != noone) {
+                if (_piece_struct != noone) {
+                    _is_capture = (_piece_struct.piece_type == 0 && _piece_struct.piece_id != "king");
+                } else {
+                    // Don't move onto AI pieces (piece_type == 1)
+                    if (_piece_on_tile.piece_type == 1) {
+                        _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=ally ";
+                        continue;
+                    }
+                    // Don't capture the king directly
+                    if (_piece_on_tile.piece_id == "king") {
+                        _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=king ";
+                        continue;
+                    }
+                    // Can capture player pieces (piece_type == 0, not king)
+                    _is_capture = true;
+                }
             }
             
             var _dist = abs(_target_col - _col) + abs(_target_row - _row);

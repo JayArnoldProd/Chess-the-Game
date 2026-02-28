@@ -92,9 +92,9 @@ if (!animating) {
             x = belt_left + offset;
         }
     }
-    // Snap enemies too
+    // Snap enemies too (but never while they're animating their own move)
     with (Enemy_Obj) {
-        if (!is_dead) {
+        if (!is_dead && !is_moving) {
             var cx = x + Board_Manager.tile_size * 0.5;
             var cy = y + Board_Manager.tile_size * 0.5;
             if (cx >= (belt_left - tile_size) && cx <= (belt_right + tile_size) &&

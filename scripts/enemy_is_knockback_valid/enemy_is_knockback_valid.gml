@@ -35,17 +35,12 @@ function enemy_is_knockback_valid(_enemy, _col, _row) {
     // Tile hazards
     var _tile = instance_position(_x, _y, Tile_Obj);
     if (_tile != noone && variable_instance_exists(_tile, "tile_type")) {
-        // Void tile
+        // Void tile blocks knockback
         if (_tile.tile_type == -1) {
             return false;
         }
-        // Water tile without bridge
-        if (_tile.tile_type == 1) {
-            var _bridge = instance_position(_x, _y, Bridge_Obj);
-            if (_bridge == noone) {
-                return false;
-            }
-        }
+        // Water is allowed for knockback (enemy will drown after landing if no bridge)
+        // Bridge presence does not block knockback
     }
     
     return true;

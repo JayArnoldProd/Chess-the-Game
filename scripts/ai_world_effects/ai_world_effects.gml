@@ -132,7 +132,19 @@ function ai_build_virtual_world() {
         var bx = round((x - Object_Manager.topleft_x) / Board_Manager.tile_size);
         var by = round((y - Object_Manager.topleft_y) / Board_Manager.tile_size);
         if (bx >= 0 && bx < 8 && by >= 0 && by < 8) {
-            array_push(_objects.bridges, { col: bx, row: by });
+            // Bridge sprites can span multiple tiles (e.g., 4 tiles across)
+            var _ts = Board_Manager.tile_size;
+            var _span_x = max(1, round((sprite_width * image_xscale) / _ts));
+            var _span_y = max(1, round((sprite_height * image_yscale) / _ts));
+            for (var dx = 0; dx < _span_x; dx++) {
+                for (var dy = 0; dy < _span_y; dy++) {
+                    var _c = bx + dx;
+                    var _r = by + dy;
+                    if (_c >= 0 && _c < 8 && _r >= 0 && _r < 8) {
+                        array_push(_objects.bridges, { col: _c, row: _r });
+                    }
+                }
+            }
         }
     }
     
