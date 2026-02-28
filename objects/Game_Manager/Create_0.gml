@@ -27,6 +27,7 @@ black_color = make_color_hsv(0,0,40);
 
 selected_piece = noone;
 hovered_piece = noone;
+hovered_enemy = noone;
 
 // Initialize the turn variable (0 = player's turn, 1 = enemy's turn)
 turn = 0;
