@@ -52,10 +52,11 @@ if (!game_over && hovered_enemy != noone && instance_exists(hovered_enemy)) {
             if (_other_enemy) continue;
             var _piece_struct = (_board != undefined) ? _board[_row][_col] : noone;
             if (_piece_struct != noone) {
-                if (_piece_struct.piece_type == 1 || _piece_struct.piece_id == "king") continue;
+                // Movement should NOT include any occupied piece (player or AI)
+                if (_piece_struct.piece_type == 1 || _piece_struct.piece_id == "king" || _piece_struct.piece_type == 0) continue;
             } else {
                 var _piece = instance_place(_px, _py, Chess_Piece_Obj);
-                if (_piece != noone && (_piece.piece_type == 1 || _piece.piece_id == "king")) continue;
+                if (_piece != noone && (_piece.piece_type == 1 || _piece.piece_id == "king" || _piece.piece_type == 0)) continue;
             }
             _move_map[_row][_col] = true;
         }
@@ -103,6 +104,23 @@ if (!game_over && hovered_enemy != noone && instance_exists(hovered_enemy)) {
         }
     }
     
+    // If a player piece is on a tile, force it to be attack-only (no blue/stripes)
+    for (var rr = 0; rr < 8; rr++) {
+        for (var cc = 0; cc < 8; cc++) {
+            var _pp = (_board != undefined) ? _board[rr][cc] : noone;
+            var _has_player = (_pp != noone && _pp.piece_type == 0);
+            if (!_has_player) {
+                var _px = Object_Manager.topleft_x + cc * _ts;
+                var _py = Object_Manager.topleft_y + rr * _ts;
+                var _inst = instance_place(_px, _py, Chess_Piece_Obj);
+                if (_inst != noone && _inst.piece_type == 0) _has_player = true;
+            }
+            if (_has_player) {
+                _move_map[rr][cc] = false; // no blue or stripes on player pieces
+            }
+        }
+    }
+    
     // Draw non-overlap
     draw_set_alpha(0.6); // stronger alpha for blue + red
     for (var rr = 0; rr < 8; rr++) {
@@ -116,7 +134,8 @@ if (!game_over && hovered_enemy != noone && instance_exists(hovered_enemy)) {
             }
             var _px = Object_Manager.topleft_x + cc * _ts;
             var _py = Object_Manager.topleft_y + rr * _ts;
-            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue; // never draw on stepping stones
+            var _stone2 = instance_position(_px + _ts * 0.5, _py + _ts * 0.5, Stepping_Stone_Obj);
+            if (_stone2 != noone) continue; // never draw on stepping stones
             draw_rectangle(_px, _py, _px + _ts, _py + _ts, false);
         }
     }
@@ -129,7 +148,8 @@ if (!game_over && hovered_enemy != noone && instance_exists(hovered_enemy)) {
             if (!_move_map[rr][cc] || !_attack_map[rr][cc]) continue;
             var _px = Object_Manager.topleft_x + cc * _ts;
             var _py = Object_Manager.topleft_y + rr * _ts;
-            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue; // never draw on stepping stones
+            var _stone2 = instance_position(_px + _ts * 0.5, _py + _ts * 0.5, Stepping_Stone_Obj);
+            if (_stone2 != noone) continue; // never draw on stepping stones
             for (var i = 0; i < _stripe_count; i++) {
                 var _s = i * _stripe_w;
                 var _is_blue = (i mod 2 == 0); // blue, red, blue, red, blue
