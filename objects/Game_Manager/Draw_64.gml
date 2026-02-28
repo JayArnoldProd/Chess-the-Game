@@ -102,6 +102,8 @@ if (!game_over && !settings_open && instance_exists(AI_Manager) && AI_Manager.ai
     draw_set_valign(fa_top);
 }
 
+// (debug removed)
+
 // --- SETTINGS PANEL ---
 if (settings_open) {
     // Initialize mute state if not exists

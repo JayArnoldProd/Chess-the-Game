@@ -1,25 +1,14 @@
-/// Enemy_Obj Draw Event
+// Game_Manager Draw Event (world space)
 
-// Get tint color from definition (default orange)
-var _tint = (enemy_def != undefined && variable_struct_exists(enemy_def, "tint_color")) 
-    ? enemy_def.tint_color : make_color_rgb(255, 140, 0);
-
-// Sprite is drawn flipped (yscale=-1) from origin (0,0 = top-left).
-// So the visible sprite occupies: x to x+24, y-24 to y.
-// We draw offset so sprite is centered on tile: draw at (x, y + 24)
-// This makes the flipped sprite render from y+24 up to y, filling the tile.
-var _draw_x = x;
-var _draw_y = y + Board_Manager.tile_size;
-
-// Hovered enemy move + attack range preview
-if (false) {
+// Enemy hover overlays in world space
+if (!game_over && hovered_enemy != noone && instance_exists(hovered_enemy)) {
+    var _en = hovered_enemy;
     var _world = ai_build_virtual_world();
     var _tiles = (_world != undefined) ? _world.tiles : undefined;
     var _bridges = (_world != undefined) ? _world.objects.bridges : undefined;
     var _board = (_world != undefined) ? _world.board : undefined;
     var _ts = Board_Manager.tile_size;
     
-    // Build 8x8 maps for move/attack overlays (for overlap stripes)
     var _move_map = array_create(8);
     var _attack_map = array_create(8);
     for (var r = 0; r < 8; r++) {
@@ -30,15 +19,13 @@ if (false) {
     var _move_color = make_color_rgb(120, 180, 255);
     var _attack_color = c_red;
     
-    // --- Move range (compute map only)
+    // Move range
     for (var dx = -1; dx <= 1; dx++) {
         for (var dy = -1; dy <= 1; dy++) {
             if (dx == 0 && dy == 0) continue;
-            var _col = grid_col + dx;
-            var _row = grid_row + dy;
+            var _col = _en.grid_col + dx;
+            var _row = _en.grid_row + dy;
             if (_col < 0 || _col > 7 || _row < 0 || _row > 7) continue;
-            
-            // Water/void checks via world tile map
             if (_tiles != undefined) {
                 var _tile_type = _tiles[_row][_col];
                 if (_tile_type == -1) continue;
@@ -52,24 +39,17 @@ if (false) {
                     if (!_has_bridge) continue;
                 }
             }
-            
             var _px = Object_Manager.topleft_x + _col * _ts;
             var _py = Object_Manager.topleft_y + _row * _ts;
-            
-            // Stepping stones are walls
-            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue;
-            // Factory droppers are deadly — avoid them
+            var _stone = instance_position(_px + _ts * 0.5, _py + _ts * 0.5, Stepping_Stone_Obj);
+            if (_stone != noone) continue;
             if (instance_place(_px, _py, Factory_Dropper_Obj)) continue;
-            
-            // Other enemies block
             var _other_enemy = false;
             for (var e = 0; e < array_length(Enemy_Manager.enemy_list); e++) {
                 var _oe = Enemy_Manager.enemy_list[e];
-                if (instance_exists(_oe) && _oe != self && _oe.grid_col == _col && _oe.grid_row == _row) { _other_enemy = true; break; }
+                if (instance_exists(_oe) && _oe != _en && _oe.grid_col == _col && _oe.grid_row == _row) { _other_enemy = true; break; }
             }
             if (_other_enemy) continue;
-            
-            // Chess pieces block (AI pieces + king), player pieces are capturable
             var _piece_struct = (_board != undefined) ? _board[_row][_col] : noone;
             if (_piece_struct != noone) {
                 if (_piece_struct.piece_type == 1 || _piece_struct.piece_id == "king") continue;
@@ -77,24 +57,20 @@ if (false) {
                 var _piece = instance_place(_px, _py, Chess_Piece_Obj);
                 if (_piece != noone && (_piece.piece_type == 1 || _piece.piece_id == "king")) continue;
             }
-            
             _move_map[_row][_col] = true;
         }
     }
     
-    // --- Attack range (compute map only)
-    var _aw = (enemy_def != undefined && variable_struct_exists(enemy_def, "attack_site_width")) ? enemy_def.attack_site_width : 1;
-    var _ah = (enemy_def != undefined && variable_struct_exists(enemy_def, "attack_site_height")) ? enemy_def.attack_site_height : 1;
+    // Attack range
+    var _aw = (variable_struct_exists(_en.enemy_def, "attack_site_width")) ? _en.enemy_def.attack_site_width : 1;
+    var _ah = (variable_struct_exists(_en.enemy_def, "attack_site_height")) ? _en.enemy_def.attack_site_height : 1;
     var _hw = floor(_aw / 2);
     var _hh = floor(_ah / 2);
-    
     for (var ax = -_hw; ax <= _hw; ax++) {
         for (var ay = -_hh; ay <= _hh; ay++) {
-            var _col = grid_col + ax;
-            var _row = grid_row + ay;
+            var _col = _en.grid_col + ax;
+            var _row = _en.grid_row + ay;
             if (_col < 0 || _col > 7 || _row < 0 || _row > 7) continue;
-            
-            // Skip tiles occupied by enemy-controlled pieces (AI pieces or other enemies)
             var _skip = false;
             if (_board != undefined) {
                 var _p = _board[_row][_col];
@@ -103,11 +79,9 @@ if (false) {
                 var _pinst = instance_place(Object_Manager.topleft_x + _col * _ts, Object_Manager.topleft_y + _row * _ts, Chess_Piece_Obj);
                 if (_pinst != noone && _pinst.piece_type == 1) _skip = true;
                 var _einst = instance_position(Object_Manager.topleft_x + _col * _ts, Object_Manager.topleft_y + _row * _ts, Enemy_Obj);
-                if (_einst != noone && _einst != self) _skip = true;
+                if (_einst != noone && _einst != _en) _skip = true;
             }
             if (_skip) continue;
-            
-            // Water/void checks for attack range too
             if (_tiles != undefined) {
                 var _tile_type = _tiles[_row][_col];
                 if (_tile_type == -1) continue;
@@ -121,18 +95,16 @@ if (false) {
                     if (!_has_bridge) continue;
                 }
             }
-            
             var _px = Object_Manager.topleft_x + _col * _ts;
             var _py = Object_Manager.topleft_y + _ts * _row;
-            // Stepping stones are walls — don't show on them
-            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue;
-            
+            var _stone = instance_position(_px + _ts * 0.5, _py + _ts * 0.5, Stepping_Stone_Obj);
+            if (_stone != noone) continue;
             _attack_map[_row][_col] = true;
         }
     }
     
-    // --- Draw non-overlap tiles
-    draw_set_alpha(0.35);
+    // Draw non-overlap
+    draw_set_alpha(0.6); // stronger alpha for blue + red
     for (var rr = 0; rr < 8; rr++) {
         for (var cc = 0; cc < 8; cc++) {
             if (_move_map[rr][cc] && !_attack_map[rr][cc]) {
@@ -144,87 +116,29 @@ if (false) {
             }
             var _px = Object_Manager.topleft_x + cc * _ts;
             var _py = Object_Manager.topleft_y + rr * _ts;
+            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue; // never draw on stepping stones
             draw_rectangle(_px, _py, _px + _ts, _py + _ts, false);
         }
     }
     
-    // --- Overlap stripes (no blending with base fills)
-    var _stripe_w = max(3, round(_ts * 0.2)); // thickness (~20% of tile)
-    draw_set_alpha(0.35);
+    // Overlap stripes (vertical, 3 blue / 2 red)
+    var _stripe_count = 5;
+    var _stripe_w = ceil(_ts / _stripe_count);
     for (var rr = 0; rr < 8; rr++) {
         for (var cc = 0; cc < 8; cc++) {
             if (!_move_map[rr][cc] || !_attack_map[rr][cc]) continue;
             var _px = Object_Manager.topleft_x + cc * _ts;
             var _py = Object_Manager.topleft_y + rr * _ts;
-            for (var s = 0; s < _ts; s += _stripe_w * 2) {
-                // Move stripe
-                draw_set_color(_move_color);
-                draw_rectangle(_px + s, _py, _px + min(_ts, s + _stripe_w), _py + _ts, false);
-                // Attack stripe
-                draw_set_color(_attack_color);
-                draw_rectangle(_px + s + _stripe_w, _py, _px + min(_ts, s + _stripe_w * 2), _py + _ts, false);
+            if (instance_place(_px, _py, Stepping_Stone_Obj)) continue; // never draw on stepping stones
+            for (var i = 0; i < _stripe_count; i++) {
+                var _s = i * _stripe_w;
+                var _is_blue = (i mod 2 == 0); // blue, red, blue, red, blue
+                draw_set_color(_is_blue ? _move_color : _attack_color);
+                draw_rectangle(_px + _s, _py, _px + min(_ts, _s + _stripe_w), _py + _ts, false);
             }
         }
     }
     
     draw_set_alpha(1);
     draw_set_color(c_white);
-}
-
-// Death animation
-if (is_dead) {
-    var _alpha = 1 - (death_timer / death_duration);
-    var _shake_x = irandom_range(-death_shake_intensity, death_shake_intensity);
-    var _shake_y = irandom_range(-death_shake_intensity, death_shake_intensity);
-    
-    draw_sprite_ext(
-        Pawn_Sprite, 0,
-        _draw_x + _shake_x, _draw_y + _shake_y,
-        1, -1, 0,
-        c_red, _alpha
-    );
-    exit;
-}
-
-// Hit flash — blend toward red when recently damaged
-if (hit_flash_timer > 0) {
-    hit_flash_timer--;
-    var _flash_intensity = hit_flash_timer / hit_flash_duration;
-    _tint = merge_color(_tint, c_red, _flash_intensity);
-}
-
-// Normal draw — upside-down pawn tinted orange to distinguish from chess pieces
-draw_sprite_ext(Pawn_Sprite, 0, _draw_x, _draw_y, 1, -1, 0, _tint, 1);
-
-// HP bar (only if max_hp > 1)
-if (draw_hp_bar && max_hp > 1) {
-    var _bar_width = 20;
-    var _bar_height = 4;
-    var _bar_x = x + (Board_Manager.tile_size - _bar_width) / 2;  // Centered on tile
-    var _bar_y = y + Board_Manager.tile_size - _bar_height - 2;  // Just inside bottom of tile
-    
-    // Background
-    draw_rectangle_color(
-        _bar_x, _bar_y,
-        _bar_x + _bar_width, _bar_y + _bar_height,
-        c_maroon, c_maroon, c_maroon, c_maroon, false
-    );
-    
-    // HP fill
-    var _hp_ratio = current_hp / max_hp;
-    var _fill_width = _bar_width * _hp_ratio;
-    var _hp_color = merge_color(c_red, c_lime, _hp_ratio);
-    
-    draw_rectangle_color(
-        _bar_x, _bar_y,
-        _bar_x + _fill_width, _bar_y + _bar_height,
-        _hp_color, _hp_color, _hp_color, _hp_color, false
-    );
-    
-    // Border
-    draw_rectangle_color(
-        _bar_x, _bar_y,
-        _bar_x + _bar_width, _bar_y + _bar_height,
-        c_black, c_black, c_black, c_black, true
-    );
 }

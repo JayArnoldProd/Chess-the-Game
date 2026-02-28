@@ -139,10 +139,8 @@ function enemy_process_turn(_enemy) {
                     _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=ally ";
                     continue;
                 }
-                if (_piece_struct.piece_id == "king") {
-                    _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=king ";
-                    continue;
-                }
+                // King is capturable by enemies
+                // (do not block king)
             } else {
                 _piece_on_tile = instance_place(_cx, _cy, Chess_Piece_Obj);
                 if (_piece_on_tile == noone) _piece_on_tile = instance_place(_px + Board_Manager.tile_size / 4, _py + Board_Manager.tile_size / 4, Chess_Piece_Obj);
@@ -153,19 +151,15 @@ function enemy_process_turn(_enemy) {
             var _is_capture = false;
             if (_piece_struct != noone || _piece_on_tile != noone) {
                 if (_piece_struct != noone) {
-                    _is_capture = (_piece_struct.piece_type == 0 && _piece_struct.piece_id != "king");
+                    _is_capture = (_piece_struct.piece_type == 0);
                 } else {
                     // Don't move onto AI pieces (piece_type == 1)
                     if (_piece_on_tile.piece_type == 1) {
                         _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=ally ";
                         continue;
                     }
-                    // Don't capture the king directly
-                    if (_piece_on_tile.piece_id == "king") {
-                        _blocked_reasons += "(" + string(_col) + "," + string(_row) + ")=king ";
-                        continue;
-                    }
-                    // Can capture player pieces (piece_type == 0, not king)
+                    // King is capturable by enemies
+                    // Can capture player pieces (piece_type == 0, including king)
                     _is_capture = true;
                 }
             }
@@ -255,7 +249,7 @@ function enemy_process_turn(_enemy) {
     var _dest_py = Object_Manager.topleft_y + _best_row * Board_Manager.tile_size;
     var _capture_piece = instance_position(_dest_px, _dest_py, Chess_Piece_Obj);
     
-    if (_capture_piece != noone && _capture_piece.piece_type == 0 && _capture_piece.piece_id != "king") {
+    if (_capture_piece != noone && _capture_piece.piece_type == 0) {
         // Capture the player piece
         show_debug_message("Enemy capturing " + _capture_piece.piece_id + " at (" + string(_best_col) + "," + string(_best_row) + ")");
         instance_destroy(_capture_piece);

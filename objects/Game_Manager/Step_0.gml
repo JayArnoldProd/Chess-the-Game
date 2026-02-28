@@ -1,5 +1,21 @@
 // Game_Manager Step Event
 
+// --- ENEMY HOVER DETECTION (Enemy_Obj has no spriteId) ---
+if (instance_exists(Object_Manager) && instance_exists(Board_Manager) && instance_exists(Enemy_Manager)) {
+    var _mx = mouse_x;
+    var _my = mouse_y;
+    var _col = floor((_mx - Object_Manager.topleft_x) / Board_Manager.tile_size);
+    var _row = floor((_my - Object_Manager.topleft_y) / Board_Manager.tile_size);
+    var _found = noone;
+    if (_col >= 0 && _col < 8 && _row >= 0 && _row < 8) {
+        for (var e = 0; e < array_length(Enemy_Manager.enemy_list); e++) {
+            var _en = Enemy_Manager.enemy_list[e];
+            if (instance_exists(_en) && !_en.is_dead && _en.grid_col == _col && _en.grid_row == _row) { _found = _en; break; }
+        }
+    }
+    hovered_enemy = _found;
+}
+
 // --- CHECKMATE DETECTION (player's turn only) ---
 if (turn == 0 && !game_over) {
     if (ai_is_king_in_check_simple(0)) {

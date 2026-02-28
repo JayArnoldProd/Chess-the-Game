@@ -87,6 +87,19 @@ if (is_moving) {
     }
 }
 
+// Hover detection (Enemy_Obj has no spriteId, so mouse events don't fire)
+if (!is_dead && instance_exists(Game_Manager)) {
+    var _mx = mouse_x;
+    var _my = mouse_y;
+    var _ts = Board_Manager.tile_size;
+    var _inside = (_mx >= x && _mx <= x + _ts && _my >= y && _my <= y + _ts);
+    if (_inside) {
+        Game_Manager.hovered_enemy = self;
+    } else if (Game_Manager.hovered_enemy == self) {
+        Game_Manager.hovered_enemy = noone;
+    }
+}
+
 // Death animation
 if (is_dead && !is_moving) {
     death_timer++;
